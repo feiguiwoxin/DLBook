@@ -97,8 +97,7 @@ public class DL_biquge extends DLBook{
 			System.out.println(Url+"下载失败!!!!!!!!!!!");
 			return null;
 		}
-		text = text.replaceAll("<br>", "\r\n");
-		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
+		text = text.replaceAll("<br>", "\r\n").replaceAll("<script>chaptererror\\(\\);</script>", "");
 		text = text.replaceAll("&nbsp;", "");
 		System.out.println(title);
 		return new Chapter(title, text);

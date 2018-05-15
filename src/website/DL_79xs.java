@@ -1,9 +1,6 @@
 package website;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -91,8 +88,7 @@ public class DL_79xs extends DLBook{
 		String title = doc.select("#htmltimu").text();
 		String text = doc.select(".contentbox").html();
 		if(text.length() == 0) return null;
-		text = text.replaceAll("&nbsp;", "");
-		text = text.replaceAll("<br>", "\r\n");
+		text = text.replaceAll("&nbsp;", "").replaceAll("<br>", "\r\n");
 		Chapter c = new Chapter(title, text);
 		System.out.println(title);
 		return c;
