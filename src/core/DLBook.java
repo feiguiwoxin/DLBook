@@ -24,7 +24,7 @@ public abstract class DLBook {
 	/*实现这3个方法可以添加任意网站进行下载
 	 * getBookInfoByKey用于根据搜索关键字返回搜索结果
 	 * getCatalog用于根据getBookInfoByKey中的书籍的URL地址返回该书所有章节的URL地址
-	 * getChapters用于根据getCatalog中的章节URL地址返回本书的章节名和内容
+	 * getChapters用于根据getCatalog中的章节URL地址返回章节名和内容
 	 * */
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 	protected abstract ArrayList<String> getCatalog(String Url);
@@ -57,8 +57,8 @@ public abstract class DLBook {
 		bookinfos = getBookInfoByKey(key);
 	}
 		
-	//根据网址获取网页内容
-	protected String getHtmlInfo(String Urladdress)
+	//根据网址和编码集获取网页内容
+	protected String getHtmlInfo(String Urladdress, String charset)
 	{
 		URL url;
 		StringBuffer result = new StringBuffer();
@@ -75,7 +75,7 @@ public abstract class DLBook {
 				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 				con.setConnectTimeout(4 * 1000);
 				con.setReadTimeout(4 * 1000);
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
 				String line = null;
 				while((line = br.readLine()) != null)
 				{

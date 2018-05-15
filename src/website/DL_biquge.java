@@ -22,7 +22,7 @@ public class DL_biquge extends DLBook{
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
 		String SearchUrl = "https://www.qu.la/SearchBook.php?" + 
 							"t=" + new Date().getTime() + "&keyword=" + key;
-		String htmlinfo = getHtmlInfo(SearchUrl);
+		String htmlinfo = getHtmlInfo(SearchUrl, "utf-8");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -49,7 +49,7 @@ public class DL_biquge extends DLBook{
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url);
+		String htmlinfo = getHtmlInfo(Url, "utf-8");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -78,7 +78,7 @@ public class DL_biquge extends DLBook{
 		
 		do
 		{
-			htmlinfo = getHtmlInfo(Url);
+			htmlinfo = getHtmlInfo(Url, "utf-8");
 			if (htmlinfo == null) return null;
 			trytime--;
 			Document doc = Jsoup.parse(htmlinfo);
@@ -110,5 +110,4 @@ public class DL_biquge extends DLBook{
 		BookBasicInfo bbi = dl.getBookinfos().get(0);
 		dl.SaveIntoFile(bbi);
 	}
-
 }
