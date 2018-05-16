@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import dao.DbControl;
+
 public abstract class DLBook {
 	protected ArrayList<BookBasicInfo> bookinfos = null;
 	protected CopyOnWriteArrayList<Chapter> chapters = null;
@@ -91,15 +93,38 @@ public abstract class DLBook {
 		return null;
 	}
 	
-	//将本地缓存的小说填入txt文件
+	/*如果chapterid=-1，表示数据库出现问题，则直接从网络下载全部章节并保存
+	 * 如果chapterid=-0，表示数据库OK但没有数据，则不从数据库获取数据，但需要将数据同时保存在数据库和txt
+	 * 如果chapterid>0，表示数据库汇总有数据，需要从数据库获取数据，同时下载剩余数据更新到数据库并保存到txt
+	 * */
 	public void SaveIntoFile(BookBasicInfo bookinfo)
 	{
-		if(null == chapters) DLChapters(bookinfo);
+		ArrayList<Chapter> chaptersindb = null;
 		String filename = "./" + bookinfo.getBookName() + " " + bookinfo.getAuthor() + ".txt";
 		BufferedWriter bw = null;
+		
+		DbControl db = new DbControl();
+		int chapterid = db.queryBookInfo(bookinfo);
+		if(chapterid > 0)
+		{
+			chaptersindb = db.getbookchapters(bookinfo);
+			if (chaptersindb == null) chapterid = -1;
+		}		
+		if(chapters == null) DLChapters(bookinfo, chapterid);
+		if(chapterid != -1) db.AddBook(bookinfo, chapters);		
 
 		try {
 			bw = new BufferedWriter(new FileWriter(new File(filename)));
+			
+			if(null != chaptersindb)
+			{
+				for(Chapter c : chaptersindb)
+				{
+					bw.write(c.getTitle() + "\r\n");
+					bw.write(c.getText() + "\r\n");
+				}
+			}		
+			
 			for(Chapter c : chapters)
 			{
 				bw.write(c.getTitle() + "\r\n");
@@ -113,18 +138,12 @@ public abstract class DLBook {
 		finally
 		{
 			try {
-				bw.close();
+				if (bw!=null) bw.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	//将本地缓存的数据填入数据库
-	public void SaveIntoDB(BookBasicInfo bookinfo)
-	{
-		if(null == chapters) DLChapters(bookinfo);
 	}
 	
 	//返回搜索结果集
@@ -135,7 +154,7 @@ public abstract class DLBook {
 	/*根据几个重要的抽象方法多线程下载小说到本地缓存。
 	 * 分发线程的时候同时放入一个id用于记录章节的顺序，
 	 * 待全部下载完成后，根据id的顺序进行排序，保证顺序不会错误*/
-	private void DLChapters(BookBasicInfo bookinfo)
+	private void DLChapters(BookBasicInfo bookinfo,int chapterid)
 	{
 		chapters = new CopyOnWriteArrayList<Chapter>();
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
@@ -147,6 +166,8 @@ public abstract class DLBook {
 		for(String catalog : catalogs)
 		{
 			id ++;
+			//如果数据库中已经缓存了chapterid章，则判断对于chapterid以前的内容不进行缓存
+			if(id <= chapterid) continue;
 			futures.add(pool.submit(new DLChapter(id, catalog)));
 		}
 		pool.shutdown();

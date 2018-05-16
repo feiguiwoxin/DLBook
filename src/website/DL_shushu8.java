@@ -95,7 +95,7 @@ public class DL_shushu8 extends DLBook{
 		if(text.length() == 0) return null;
 		text = text.replaceAll("\n", "").replaceAll("<div(.+?)mobile_go\\(\\);</script>", "");
 		text = text.replaceAll("<div(.+?)</div>", "").replaceAll("\\s{3,6}", "\r\n");
-		System.out.println(Url + title);
+		System.out.println(title);
 		return new Chapter(title, text);
 	}
 
