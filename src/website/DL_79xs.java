@@ -88,7 +88,6 @@ public class DL_79xs extends DLBook{
 		String title = doc.select("#htmltimu").text();
 		String text = doc.select(".contentbox").html();
 		if(text.length() == 0) return null;
-		text = text.replaceAll("&nbsp;", "").replaceAll("<br>", "\r\n");
 		Chapter c = new Chapter(title, text);
 		System.out.println(title);
 		return c;
@@ -97,7 +96,6 @@ public class DL_79xs extends DLBook{
 	public static void main(String[] args)
 	{
 		DL_79xs web = new DL_79xs("人魅");
-		//web.getCatalog(web.getBookinfos().get(0).getBookUrl());
 		web.SaveIntoFile(web.getBookinfos().get(0));
 	}
 }
