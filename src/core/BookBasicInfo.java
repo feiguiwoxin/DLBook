@@ -5,6 +5,7 @@ public class BookBasicInfo {
 	private String BookName;
 	private String author;
 	private String lastChapter;
+	private String website;
 	private boolean isfinal;
 	
 	public String getBookUrl() {
@@ -36,5 +37,11 @@ public class BookBasicInfo {
 	}
 	public void setIsfinal(boolean isfinal) {
 		this.isfinal = isfinal;
+	}
+	public String getWebsite() {
+		return website;
+	}
+	public void setWebsite(String website) {
+		this.website = website;
 	}
 }

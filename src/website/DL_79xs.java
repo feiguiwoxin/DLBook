@@ -53,6 +53,7 @@ public class DL_79xs extends DLBook{
 			bookinfo.setIsfinal(finalflag);
 			bookinfo.setBookUrl("http://www.79xs.com" + doc.select(".b1>a").attr("href"));
 			bookinfo.setLastChapter(doc.select(".dd2>p>a").text());
+			bookinfo.setWebsite("79xs");
 			bookinfos.add(bookinfo);
 		}
 		
@@ -89,7 +90,6 @@ public class DL_79xs extends DLBook{
 		String text = doc.select(".contentbox").html();
 		if(text.length() == 0) return null;
 		Chapter c = new Chapter(title, text);
-		System.out.println(title);
 		return c;
 	}
 

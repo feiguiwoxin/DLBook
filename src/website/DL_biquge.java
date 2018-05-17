@@ -41,6 +41,7 @@ public class DL_biquge extends DLBook{
 			if(isfinal.get(i).text().equals("完成")) finalflag = true;
 			bookinfo.setIsfinal(finalflag);
 			bookinfo.setLastChapter(lastChapter.get(i).text());
+			bookinfo.setWebsite("biquge");
 			allbookinfo.add(bookinfo);
 		}
 		
@@ -97,14 +98,13 @@ public class DL_biquge extends DLBook{
 			System.out.println(Url+"下载失败!!!!!!!!!!!");
 			return null;
 		}
-		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
-		System.out.println(title);
+		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "").replaceAll("\n", "\r\n");
 		return new Chapter(title, text);
 	}
 	
 	public static void main(String[] args)
 	{
-		DL_biquge dl = new DL_biquge("都市至尊神相");
+		DL_biquge dl = new DL_biquge("武炼巅峰");
 		BookBasicInfo bbi = dl.getBookinfos().get(0);
 		dl.SaveIntoFile(bbi);
 	}

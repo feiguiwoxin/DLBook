@@ -61,6 +61,7 @@ public class DL_shushu8 extends DLBook{
 			bookinfo.setBookUrl("http://www.shushu8.com" + doc.select(".diralinks").attr("href"));
 			bookinfo.setLastChapter(doc.select(".lastrecord>strong").text());
 			bookinfo.setIsfinal(isfinal);
+			bookinfo.setWebsite("shushu8");
 			bookinfos.add(bookinfo);
 		}
 			
@@ -95,13 +96,12 @@ public class DL_shushu8 extends DLBook{
 		if(text.length() == 0) return null;
 		text = text.replaceAll("\n", "").replaceAll("<div(.+?)mobile_go\\(\\);</script>", "");
 		text = text.replaceAll("<div(.+?)</div>", "").replaceAll("\\s{3,6}", "<br>");
-		System.out.println(title);
 		return new Chapter(title, text);
 	}
 
 	public static void main(String[] args)
 	{
-		DL_shushu8 dl = new DL_shushu8("重生之电子风云");
+		DL_shushu8 dl = new DL_shushu8("武炼巅峰");
 		dl.SaveIntoFile(dl.getBookinfos().get(0));
 	}
 }

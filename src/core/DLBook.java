@@ -49,6 +49,7 @@ public abstract class DLBook {
 			Chapter c = getChapters(url);
 			if(c == null) return null;
 			c.setId(chapterid);
+			System.out.println(c.getTitle());
 			return c;
 		}
 	}
@@ -64,7 +65,7 @@ public abstract class DLBook {
 	{
 		URL url;
 		StringBuffer result = new StringBuffer();
-		int trytime = 3;
+		int trytime = 5;
 
 		while(trytime > 0)
 		{
@@ -120,15 +121,17 @@ public abstract class DLBook {
 			{
 				for(Chapter c : chaptersindb)
 				{
-					bw.write(c.getTitle() + "\r\n");
-					bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "") + "\r\n");
+					bw.write("ψψψψ" + c.getTitle() + "\r\n");
+					bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "")
+										.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
 				}
 			}		
 			
 			for(Chapter c : chapters)
 			{
-				bw.write(c.getTitle() + "\r\n");
-				bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "") + "\r\n");
+				bw.write("ψψψψ" + c.getTitle() + "\r\n");
+				bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "")
+									.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
 			}
 			System.out.println("Save Over~~");
 		} catch (IOException e) {

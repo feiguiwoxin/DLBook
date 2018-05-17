@@ -38,16 +38,17 @@ public class DbControl {
 		
 		try {
 			this.OpenConnection();
-			cs = con.prepareCall("call insert_bookinfo(?,?,?,?,?,?)");
+			cs = con.prepareCall("call insert_bookinfo(?,?,?,?,?,?,?)");
 			cs.setString(1, bookinfo.getBookName());
 			cs.setString(2, bookinfo.getAuthor());
 			cs.setString(3, bookinfo.getLastChapter());
 			cs.setInt(4, bookinfo.isIsfinal()?1:0);
-			cs.registerOutParameter(5, Types.INTEGER);
+			cs.setString(5, bookinfo.getWebsite());
 			cs.registerOutParameter(6, Types.INTEGER);
+			cs.registerOutParameter(7, Types.INTEGER);
 			cs.execute();
-			int bookid = cs.getInt(5);
-			int chapterid = cs.getInt(6);
+			int bookid = cs.getInt(6);
+			int chapterid = cs.getInt(7);
 			
 			con.setAutoCommit(false);
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
@@ -65,6 +66,7 @@ public class DbControl {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return;
 		}
 		finally
 		{
@@ -88,12 +90,13 @@ public class DbControl {
 		
 		try {
 			this.OpenConnection();
-			cs = con.prepareCall("call query_bookinfo(?,?,?)");
+			cs = con.prepareCall("call query_bookinfo(?,?,?,?)");
 			cs.setString(1, bookinfo.getBookName());
 			cs.setString(2, bookinfo.getAuthor());
-			cs.registerOutParameter(3, Types.INTEGER);
+			cs.setString(3, bookinfo.getWebsite());
+			cs.registerOutParameter(4, Types.INTEGER);
 			cs.execute();
-			id = cs.getInt(3);
+			id = cs.getInt(4);
 			return id;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -120,9 +123,10 @@ public class DbControl {
 		ArrayList<Chapter> chapters = new ArrayList<Chapter>();
 		try {
 			this.OpenConnection();
-			ps = con.prepareStatement("select bookid from books where bookname=? and author=?;");
+			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and website=?;");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
+			ps.setString(3, bookinfo.getWebsite());
 			ResultSet rs = ps.executeQuery();
 			rs.last();
 			int bookid = rs.getInt(1);
