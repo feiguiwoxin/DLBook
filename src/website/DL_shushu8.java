@@ -92,16 +92,15 @@ public class DL_shushu8 extends DLBook{
 		
 		Document doc = Jsoup.parse(htmlinfo);
 		String title = doc.select(".page-body>h1").text();
-		String text = doc.select("#content").html();
+		String text = doc.select("#content").text();
 		if(text.length() == 0) return null;
-		text = text.replaceAll("\n", "").replaceAll("<div(.+?)mobile_go\\(\\);</script>", "");
-		text = text.replaceAll("<div(.+?)</div>", "").replaceAll("\\s{3,6}", "<br>");
+		text = text.replaceAll("\n|\r\n", "\r\n").replace("\r\n", "<br>");
 		return new Chapter(title, text);
 	}
 
 	public static void main(String[] args)
 	{
-		DL_shushu8 dl = new DL_shushu8("武炼巅峰");
+		DL_shushu8 dl = new DL_shushu8("奶爸的科技武道馆");
 		dl.SaveIntoFile(dl.getBookinfos().get(0));
 	}
 }

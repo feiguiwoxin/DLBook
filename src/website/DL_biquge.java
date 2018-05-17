@@ -98,13 +98,14 @@ public class DL_biquge extends DLBook{
 			System.out.println(Url+"下载失败!!!!!!!!!!!");
 			return null;
 		}
-		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "").replaceAll("\n", "\r\n");
+		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
+		text = text.replaceAll("\n|\r\n", "\r\n");
 		return new Chapter(title, text);
 	}
 	
 	public static void main(String[] args)
 	{
-		DL_biquge dl = new DL_biquge("武炼巅峰");
+		DL_biquge dl = new DL_biquge("奶爸的科技武道馆");
 		BookBasicInfo bbi = dl.getBookinfos().get(0);
 		dl.SaveIntoFile(bbi);
 	}

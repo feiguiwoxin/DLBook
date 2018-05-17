@@ -82,7 +82,7 @@ public abstract class DLBook {
 				String line = null;
 				while((line = br.readLine()) != null)
 				{
-					result.append(line);
+					result.append(line+"\r\n");
 				}
 				return result.toString();
 			} catch (Exception e) {
