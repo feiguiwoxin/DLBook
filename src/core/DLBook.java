@@ -18,10 +18,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import dao.DbControl;
+import ui.PanelControl;
 
 public abstract class DLBook {
 	protected ArrayList<BookBasicInfo> bookinfos = null;
 	protected CopyOnWriteArrayList<Chapter> chapters = null;
+	private PanelControl pc = null;
 	
 	/*实现这3个方法可以添加任意网站进行下载
 	 * getBookInfoByKey用于根据搜索关键字返回搜索结果
@@ -55,9 +57,10 @@ public abstract class DLBook {
 	}
 	
 	//在构造对象的同时直接生成搜索结果
-	public DLBook(String key)
+	public DLBook(String key, PanelControl pc)
 	{
 		bookinfos = getBookInfoByKey(key);
+		this.pc = pc;
 	}
 		
 	//根据网址和编码集获取网页内容
@@ -103,17 +106,28 @@ public abstract class DLBook {
 		ArrayList<Chapter> chaptersindb = null;
 		String filename = "./" + bookinfo.getBookName() + " " + bookinfo.getAuthor() + ".txt";
 		BufferedWriter bw = null;
+		int failnum = 0;
 		
 		DbControl db = new DbControl();
+		pc.setStateMsg("正在从数据库中获取已存储的章节");
 		int chapterid = db.queryBookInfo(bookinfo);
 		if(chapterid > 0)
 		{
 			chaptersindb = db.getbookchapters(bookinfo);
-			if (chaptersindb == null) chapterid = -1;
+			if (chaptersindb == null)
+			{
+				pc.setStateMsg("数据库获取数据失败，开始从网络下载");
+				chapterid = -1;
+			}
+			else
+			{
+				pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()));
+			}
 		}		
-		if(chapters == null) DLChapters(bookinfo, chapterid);
+		if(chapters == null) failnum = DLChapters(bookinfo, chapterid);
 		if(chapterid != -1) db.AddBook(bookinfo, chapters);		
 
+		pc.setStateMsg("将数据写入txt文本中");
 		try {
 			bw = new BufferedWriter(new FileWriter(new File(filename)));
 			
@@ -133,7 +147,8 @@ public abstract class DLBook {
 				bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "")
 									.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
 			}
-			System.out.println("Save Over~~");
+			chapters = null;
+			pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -147,6 +162,7 @@ public abstract class DLBook {
 				e.printStackTrace();
 			}
 		}
+		pc.finishDl();
 	}
 	
 	//返回搜索结果集
@@ -157,15 +173,17 @@ public abstract class DLBook {
 	/*根据几个重要的抽象方法多线程下载小说到本地缓存。
 	 * 分发线程的时候同时放入一个id用于记录章节的顺序，
 	 * 待全部下载完成后，根据id的顺序进行排序，保证顺序不会错误*/
-	private void DLChapters(BookBasicInfo bookinfo,int chapterid)
+	private int DLChapters(BookBasicInfo bookinfo,int chapterid)
 	{
+		chapterid = chapterid<0?0:chapterid;
 		chapters = new CopyOnWriteArrayList<Chapter>();
+		pc.setStateMsg("从网络中获取目录");
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
-		int id = 0;
+		int id = 0,failnum = 0,successnum = 0,wholenum = catalogs.size() - chapterid;
 		
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		ArrayList<Future<Chapter>> futures = new ArrayList<Future<Chapter>>();
-		System.out.println("Whole chapters:" + catalogs.size());
+		pc.setStateMsg(String.format("章节共计%d,数据库已缓存%d，需要下载%d", catalogs.size(), chapterid, wholenum));
 		for(String catalog : catalogs)
 		{
 			id ++;
@@ -179,9 +197,15 @@ public abstract class DLBook {
 		{
 			Chapter c = null;
 			try {
+				pc.setStateMsg(String.format("已完成/失败/总计:%d/%d/%d", successnum,failnum,wholenum));
 				c = future.get();
-				if(c == null) continue;
+				if(c == null) 
+				{
+					failnum++;
+					continue;
+				}
 				chapters.add(c);
+				successnum++;
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
@@ -194,8 +218,7 @@ public abstract class DLBook {
 				return o1.getId() - o2.getId();
 			}
 		});
-		System.out.println("DL Over,DL Chapters:" + chapters.size());
-		
-		return;
+		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum);
+		return failnum;
 	}
 }

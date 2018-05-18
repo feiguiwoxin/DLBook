@@ -34,21 +34,20 @@ public class DbControl {
 		CallableStatement cs = null;
 		PreparedStatement ps = null;
 		
-		if(chapters == null || chapters.size() == 0) return;
-		
 		try {
 			this.OpenConnection();
-			cs = con.prepareCall("call insert_bookinfo(?,?,?,?,?,?,?)");
+			cs = con.prepareCall("call insert_bookinfo(?,?,?,?,?,?,?,?)");
 			cs.setString(1, bookinfo.getBookName());
 			cs.setString(2, bookinfo.getAuthor());
 			cs.setString(3, bookinfo.getLastChapter());
 			cs.setInt(4, bookinfo.isIsfinal()?1:0);
 			cs.setString(5, bookinfo.getWebsite());
-			cs.registerOutParameter(6, Types.INTEGER);
+			cs.setString(6, bookinfo.getBookUrl());
 			cs.registerOutParameter(7, Types.INTEGER);
+			cs.registerOutParameter(8, Types.INTEGER);
 			cs.execute();
-			int bookid = cs.getInt(6);
-			int chapterid = cs.getInt(7);
+			int bookid = cs.getInt(7);
+			int chapterid = cs.getInt(8);
 			
 			con.setAutoCommit(false);
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
@@ -123,7 +122,7 @@ public class DbControl {
 		ArrayList<Chapter> chapters = new ArrayList<Chapter>();
 		try {
 			this.OpenConnection();
-			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and website=?;");
+			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=?;");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
 			ps.setString(3, bookinfo.getWebsite());

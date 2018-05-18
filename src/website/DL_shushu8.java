@@ -12,11 +12,12 @@ import org.jsoup.select.Elements;
 import core.BookBasicInfo;
 import core.Chapter;
 import core.DLBook;
+import ui.PanelControl;
 
 public class DL_shushu8 extends DLBook{
 
-	public DL_shushu8(String key) {
-		super(key);
+	public DL_shushu8(String key,PanelControl pc) {
+		super(key, pc);
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class DL_shushu8 extends DLBook{
 			bookinfo.setBookUrl("http://www.shushu8.com" + doc.select(".diralinks").attr("href"));
 			bookinfo.setLastChapter(doc.select(".lastrecord>strong").text());
 			bookinfo.setIsfinal(isfinal);
-			bookinfo.setWebsite("shushu8");
+			bookinfo.setWebsite("书书吧");
 			bookinfos.add(bookinfo);
 		}
 			
@@ -98,9 +99,9 @@ public class DL_shushu8 extends DLBook{
 		return new Chapter(title, text);
 	}
 
-	public static void main(String[] args)
-	{
-		DL_shushu8 dl = new DL_shushu8("奶爸的科技武道馆");
-		dl.SaveIntoFile(dl.getBookinfos().get(0));
-	}
+//	public static void main(String[] args)
+//	{
+//		DL_shushu8 dl = new DL_shushu8("召唤我吧");
+//		dl.SaveIntoFile(dl.getBookinfos().get(0));
+//	}
 }

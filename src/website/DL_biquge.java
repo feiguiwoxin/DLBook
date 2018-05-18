@@ -11,11 +11,12 @@ import org.jsoup.select.Elements;
 import core.BookBasicInfo;
 import core.Chapter;
 import core.DLBook;
+import ui.PanelControl;
 
 public class DL_biquge extends DLBook{
 
-	public DL_biquge(String key) {
-		super(key);
+	public DL_biquge(String key, PanelControl pc) {
+		super(key, pc);
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class DL_biquge extends DLBook{
 			if(isfinal.get(i).text().equals("完成")) finalflag = true;
 			bookinfo.setIsfinal(finalflag);
 			bookinfo.setLastChapter(lastChapter.get(i).text());
-			bookinfo.setWebsite("biquge");
+			bookinfo.setWebsite("笔趣阁");
 			allbookinfo.add(bookinfo);
 		}
 		
@@ -103,10 +104,10 @@ public class DL_biquge extends DLBook{
 		return new Chapter(title, text);
 	}
 	
-	public static void main(String[] args)
-	{
-		DL_biquge dl = new DL_biquge("奶爸的科技武道馆");
-		BookBasicInfo bbi = dl.getBookinfos().get(0);
-		dl.SaveIntoFile(bbi);
-	}
+//	public static void main(String[] args)
+//	{
+//		DL_biquge dl = new DL_biquge("武炼巅峰");
+//		BookBasicInfo bbi = dl.getBookinfos().get(0);
+//		dl.SaveIntoFile(bbi);
+//	}
 }

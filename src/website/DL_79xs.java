@@ -12,11 +12,12 @@ import org.jsoup.select.Elements;
 import core.BookBasicInfo;
 import core.Chapter;
 import core.DLBook;
+import ui.PanelControl;
 
 public class DL_79xs extends DLBook{
 
-	public DL_79xs(String key) {
-		super(key);
+	public DL_79xs(String key, PanelControl pc) {
+		super(key, pc);
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class DL_79xs extends DLBook{
 			bookinfo.setIsfinal(finalflag);
 			bookinfo.setBookUrl("http://www.79xs.com" + doc.select(".b1>a").attr("href"));
 			bookinfo.setLastChapter(doc.select(".dd2>p>a").text());
-			bookinfo.setWebsite("79xs");
+			bookinfo.setWebsite("79小说");
 			bookinfos.add(bookinfo);
 		}
 		
@@ -94,9 +95,9 @@ public class DL_79xs extends DLBook{
 		return c;
 	}
 
-	public static void main(String[] args)
-	{
-		DL_79xs web = new DL_79xs("奶爸的科技武道馆");
-		web.SaveIntoFile(web.getBookinfos().get(0));
-	}
+//	public static void main(String[] args)
+//	{
+//		DL_79xs web = new DL_79xs("召唤我吧");
+//		web.SaveIntoFile(web.getBookinfos().get(0));
+//	}
 }
