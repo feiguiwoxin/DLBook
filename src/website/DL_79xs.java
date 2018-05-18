@@ -94,10 +94,4 @@ public class DL_79xs extends DLBook{
 		Chapter c = new Chapter(title, text);
 		return c;
 	}
-
-//	public static void main(String[] args)
-//	{
-//		DL_79xs web = new DL_79xs("召唤我吧");
-//		web.SaveIntoFile(web.getBookinfos().get(0));
-//	}
 }

@@ -1,6 +1,5 @@
 username=root
 password=mysql
 database=book
-class=website.DL_79xs,website.DL_biquge,website.DL_shushu8
 width=600
 height=480

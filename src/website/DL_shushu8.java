@@ -98,10 +98,4 @@ public class DL_shushu8 extends DLBook{
 		text = text.replaceAll("\n|\r\n", "\r\n").replace("\r\n", "<br>");
 		return new Chapter(title, text);
 	}
-
-//	public static void main(String[] args)
-//	{
-//		DL_shushu8 dl = new DL_shushu8("召唤我吧");
-//		dl.SaveIntoFile(dl.getBookinfos().get(0));
-//	}
 }
