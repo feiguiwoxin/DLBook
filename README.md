@@ -27,7 +27,8 @@ PS:使用System.out.println()将直接输出到DLBookLog运行日志中。
 1）网上搜寻一下，将mysql数据的编码字符修改为UTF-8  
 2）在config.properity配置mysql数据库帐号，密码，数据库名。  
 3）在数据库中增加如下数据表和存储过程。  
-### 数据表：  
+### 数据表： 
+```
 CREATE TABLE `books` (  
   `bookid` int(11) NOT NULL AUTO_INCREMENT,  
   `bookname` varchar(60) DEFAULT NULL,  
@@ -48,7 +49,9 @@ CREATE TABLE `chapters` (
   PRIMARY KEY (`bookid`,`chapterid`),  
   CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`bookid`) REFERENCES `books` (`bookid`)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;  
+```
 ### 存储过程  
+```
 DELIMITER ;;  
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)  
 BEGIN  
@@ -83,6 +86,6 @@ BEGIN
   END IF;  
 END;;  
 DELIMITER ;  
-
+```
 
 
