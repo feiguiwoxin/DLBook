@@ -52,14 +52,14 @@ CREATE TABLE `chapters` (
 ```
 ### 存储过程  
 ```
-DELIMITER ;;  
+DELIMITER ;;
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)  
 BEGIN  
   DECLARE num int DEFAULT -1;  
   DECLARE finalchapter VARCHAR(60);    
   DECLARE weburl VARCHAR(128);  
   DECLARE finalflag TINYINT;  
-
   SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal  
   into num,finalchapter,weburl,isfinal FROM books  
   where books.bookname=bookname and books.author=author and books.websitename=websitename;  
@@ -75,6 +75,7 @@ BEGIN
     SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;     set chapterid =0;  
   END IF;  
 END;;  
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `query_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `websitename` varchar(60),OUT `id` int)  
 BEGIN  
   DECLARE num int DEFAULT -1;  
@@ -85,6 +86,7 @@ BEGIN
     SET id = 0;  
   END IF;  
 END;;  
+
 DELIMITER ;  
 ```
 
