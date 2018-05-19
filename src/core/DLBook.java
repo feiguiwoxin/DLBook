@@ -55,6 +55,21 @@ public abstract class DLBook {
 				return null;
 			}
 			c.setId(chapterid);
+			
+			/*对网页内容进行处理，方便后续阅读
+			1.由于mysql只能存储1-3字节的utf-8，因此去除4字节的utf-8，主要包含emoji表情，不影响汉字保存
+			2.将<br><br/><p></p>等常见的html换行符转化为\r\n
+			3.将\n全部替换为\r\n
+			4.合并\r\n将空行去除
+			5.为了方便网页阅读将换行换成<br><br>与2个空格
+			*/
+			String text = c.getText();
+			text = text.replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", "");
+			text = text.replaceAll("<br>|<p>|</p>|<br/>", "\r\n");
+			text = text.replaceAll("\n|\r\n", "\r\n");
+			text = text.replaceAll("　| |&nbsp;", "").replaceAll("\n[\\s]*\r", "");
+			text = "　　" + text.replaceAll("\r\n", "<br><br>　　");
+			c.setText(text);
 			return c;
 		}
 	}
@@ -139,16 +154,14 @@ public abstract class DLBook {
 				for(Chapter c : chaptersindb)
 				{
 					bw.write("ψψψψ" + c.getTitle() + "\r\n");
-					bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "")
-										.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
+					bw.write(c.getText().replaceAll("<br>", "\r\n") + "\r\n");
 				}
 			}		
 			
 			for(Chapter c : chapters)
 			{
 				bw.write("ψψψψ" + c.getTitle() + "\r\n");
-				bw.write(c.getText().replaceAll("<br>", "\r\n").replaceAll("&nbsp;", "")
-									.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
+				bw.write(c.getText().replaceAll("<br>", "\r\n") + "\r\n");
 			}
 			chapters = null;
 			pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
@@ -209,8 +222,6 @@ public abstract class DLBook {
 					failnum++;
 					continue;
 				}
-				//由于mysql只能存储1-3字节的utf-8，因此去除4字节的utf-8，主要包含emoji表情，不影响汉字保存
-				c.setText(c.getText().replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", ""));
 				chapters.add(c);
 				successnum++;
 			} catch (InterruptedException | ExecutionException e) {

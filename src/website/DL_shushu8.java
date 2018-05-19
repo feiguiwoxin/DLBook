@@ -96,7 +96,6 @@ public class DL_shushu8 extends DLBook{
 		String title = doc.select(".page-body>h1").text();
 		String text = doc.select("#content").text();
 		if(text.length() == 0) return null;
-		text = text.replaceAll("\n|\r\n", "\r\n").replace("\r\n", "<br>");
 		return new Chapter(title, text);
 	}
 }

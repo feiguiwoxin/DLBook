@@ -91,7 +91,6 @@ public class DL_79xs extends DLBook{
 		String title = doc.select("#htmltimu").text();
 		String text = doc.select(".contentbox").html();
 		if(text.length() == 0) return null;
-		text = text.replaceAll("\n|\r\n", "\r\n");
 		Chapter c = new Chapter(title, text);
 		return c;
 	}

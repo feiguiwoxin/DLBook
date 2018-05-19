@@ -61,7 +61,6 @@ public class DL_biquge extends DLBook{
 		int dtnum = 0;
 		for(Element catalog : Catalogs)
 		{
-			//System.out.println(catalog.tagName());
 			if(catalog.tagName().equals("dt")) dtnum ++;
 			if(dtnum >1 && catalog.tagName().equals("a"))
 			{
@@ -94,13 +93,8 @@ public class DL_biquge extends DLBook{
 			}
 		}while(text.length() == 0 && trytime > 0);
 
-		if(text.length() == 0)
-		{
-			System.out.println(Url+"下载失败!!!!!!!!!!!");
-			return null;
-		}
+		if(text.length() == 0) return null;
 		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
-		text = text.replaceAll("\n|\r\n", "\r\n");
 		return new Chapter(title, text);
 	}
 }

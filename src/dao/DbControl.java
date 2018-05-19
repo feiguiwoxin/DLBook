@@ -53,7 +53,6 @@ public class DbControl {
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
 			for(Chapter chapter : chapters)
 			{
-				System.out.println(chapter.getTitle());
 				if(chapter.getId() <= chapterid) continue;
 				ps.setString(1, chapter.getTitle());
 				ps.setString(2, chapter.getText());
