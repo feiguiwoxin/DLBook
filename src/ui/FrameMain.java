@@ -1,6 +1,9 @@
 package ui;
 
 import java.awt.Toolkit;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import static Config.config.*;
@@ -8,7 +11,9 @@ import static Config.config.*;
 @SuppressWarnings("serial")
 public class FrameMain extends JFrame {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
+		System.setOut(new PrintStream("DLBookLog.txt"));
+		System.out.println(new Date().toString());
 		FrameMain frame = new FrameMain();
 		frame.setVisible(true);
 	}

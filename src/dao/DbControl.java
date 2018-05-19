@@ -53,6 +53,7 @@ public class DbControl {
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
 			for(Chapter chapter : chapters)
 			{
+				System.out.println(chapter.getTitle());
 				if(chapter.getId() <= chapterid) continue;
 				ps.setString(1, chapter.getTitle());
 				ps.setString(2, chapter.getText());
@@ -63,8 +64,8 @@ public class DbControl {
 			con.commit();
 			con.setAutoCommit(true);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("操作数据库失败(AddBook):"+e.getMessage());
 			return;
 		}
 		finally
@@ -74,7 +75,7 @@ public class DbControl {
 				if (ps != null) ps.close();
 				if (con != null) this.CloseConnection();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				System.out.println("操作数据库失败(AddBook),关闭资源失败"+e.getMessage());
 				e.printStackTrace();
 				return;
 			}		
@@ -98,7 +99,7 @@ public class DbControl {
 			id = cs.getInt(4);
 			return id;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			System.out.println("操作数据库失败(queryBookInfo):"+e.getMessage());
 			e.printStackTrace();
 			return -1;
 		}
@@ -108,7 +109,7 @@ public class DbControl {
 				if (cs != null) cs.close();
 				if (con != null) this.CloseConnection();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				System.out.println("操作数据库失败，关闭资源失败(queryBookInfo)"+e.getMessage());
 				e.printStackTrace();
 				return -1;
 			}		
@@ -139,7 +140,7 @@ public class DbControl {
 				chapters.add(new Chapter(rs.getString(1), rs.getString(2)));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			System.out.println("操作数据库失败(getbookchapters):"+e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
@@ -149,7 +150,7 @@ public class DbControl {
 				if (ps != null) ps.close();
 				if (con != null) this.CloseConnection();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				System.out.println("操作数据库失败，关闭资源失败(getbookchapters):"+e.getMessage());
 				e.printStackTrace();
 				return null;
 			}		

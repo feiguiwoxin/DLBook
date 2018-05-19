@@ -26,8 +26,9 @@ public class DL_shushu8 extends DLBook{
 		try {
 			allurl = "http://www.shushu8.com/bookso.php?kw=" + URLEncoder.encode(key, "gb2312");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("解码失败(gb2312):"+key);
+			return null;
 		}
 		String htmlinfo = getHtmlInfo(allurl, "gb2312");
 		if(htmlinfo == null) return null;

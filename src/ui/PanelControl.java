@@ -105,9 +105,10 @@ public class PanelControl extends JPanel{
 		buttonsearch.doClick();
 	}
 	
-	public void setStateMsg(String msg)
+	public void setStateMsg(String msg,boolean intolog)
 	{
 		textfieldstat.setText(msg);
+		if(intolog) System.out.println(msg);
 		textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
 	}
 }

@@ -28,8 +28,9 @@ public class DL_79xs extends DLBook{
 			htmlinfo = getHtmlInfo(allurl, "gb2312");
 			if (htmlinfo == null) return null;
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("解码失败(gb2312):" + key);
+			return null;
 		}
 		//这个网站的搜索结果只能导向小说的index页面，这里先获取index页面的网址
 		Document doc = Jsoup.parse(htmlinfo);

@@ -49,9 +49,12 @@ public abstract class DLBook {
 		@Override
 		public Chapter call() throws Exception {
 			Chapter c = getChapters(url);
-			if(c == null) return null;
+			if(c == null)
+			{
+				System.out.println("下载失败:"+url);
+				return null;
+			}
 			c.setId(chapterid);
-			System.out.println(c.getTitle());
 			return c;
 		}
 	}
@@ -89,7 +92,6 @@ public abstract class DLBook {
 				}
 				return result.toString();
 			} catch (Exception e) {
-				//TODO:增加日志系统
 				System.out.println(Urladdress + "连接超时，重试" + trytime);
 				trytime--;			
 			}
@@ -109,25 +111,26 @@ public abstract class DLBook {
 		int failnum = 0;
 		
 		DbControl db = new DbControl();
-		pc.setStateMsg("正在从数据库中获取已存储的章节");
+		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));
+		pc.setStateMsg("正在从数据库中获取已存储的章节",true);
 		int chapterid = db.queryBookInfo(bookinfo);
 		if(chapterid > 0)
 		{
 			chaptersindb = db.getbookchapters(bookinfo);
 			if (chaptersindb == null)
 			{
-				pc.setStateMsg("数据库获取数据失败，开始从网络下载");
+				pc.setStateMsg("数据库获取数据失败，开始从网络下载",true);
 				chapterid = -1;
 			}
 			else
 			{
-				pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()));
+				pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()),true);
 			}
 		}		
 		if(chapters == null) failnum = DLChapters(bookinfo, chapterid);
 		if(chapterid != -1) db.AddBook(bookinfo, chapters);		
 
-		pc.setStateMsg("将数据写入txt文本中");
+		pc.setStateMsg("将数据写入txt文本中",true);
 		try {
 			bw = new BufferedWriter(new FileWriter(new File(filename)));
 			
@@ -148,18 +151,20 @@ public abstract class DLBook {
 									.replaceAll("　", " ").replaceAll("\n[\\s]*\r", "")+ "\r\n");
 			}
 			chapters = null;
-			pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum);
+			pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("写入文件失败" + filename);
+			return;
 		}
 		finally
 		{
 			try {
 				if (bw!=null) bw.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.out.println("写入文件失败" + filename);
+				return;
 			}
 		}
 		pc.finishDl();
@@ -177,13 +182,13 @@ public abstract class DLBook {
 	{
 		chapterid = chapterid<0?0:chapterid;
 		chapters = new CopyOnWriteArrayList<Chapter>();
-		pc.setStateMsg("从网络中获取目录");
+		pc.setStateMsg("从网络中获取目录",true);
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
 		int id = 0,failnum = 0,successnum = 0,wholenum = catalogs.size() - chapterid;
 		
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		ArrayList<Future<Chapter>> futures = new ArrayList<Future<Chapter>>();
-		pc.setStateMsg(String.format("章节共计%d,数据库已缓存%d，需要下载%d", catalogs.size(), chapterid, wholenum));
+		pc.setStateMsg(String.format("章节共计%d,数据库已缓存%d，需要下载%d", catalogs.size(), chapterid, wholenum),true);
 		for(String catalog : catalogs)
 		{
 			id ++;
@@ -197,17 +202,21 @@ public abstract class DLBook {
 		{
 			Chapter c = null;
 			try {
-				pc.setStateMsg(String.format("已完成/失败/总计:%d/%d/%d", successnum,failnum,wholenum));
+				pc.setStateMsg(String.format("已完成/失败/总计:%d/%d/%d", successnum,failnum,wholenum),false);
 				c = future.get();
 				if(c == null) 
 				{
 					failnum++;
 					continue;
 				}
+				//由于mysql只能存储1-3字节的utf-8，因此去除4字节的utf-8，主要包含emoji表情，不影响汉字保存
+				c.setText(c.getText().replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", ""));
 				chapters.add(c);
 				successnum++;
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
+				System.out.println("章节缓存失败" + (successnum + failnum));
+				continue;
 			}
 		}
 		chapters.sort(new Comparator<Chapter>()
@@ -218,7 +227,7 @@ public abstract class DLBook {
 				return o1.getId() - o2.getId();
 			}
 		});
-		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum);
+		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;
 	}
 }

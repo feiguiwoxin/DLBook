@@ -3,6 +3,8 @@ package Config;
 import java.io.FileReader;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
+
 public class config {
 	public static String username = null;
 	public static String password = null;
@@ -24,6 +26,9 @@ public class config {
 			frameh = Integer.parseInt(pro.getProperty("height"));
 		} catch (Exception e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "读取配置文件config.properity失败，请将该文件放置在当前java程序的同一级目录。",
+											"错误说明", JOptionPane.ERROR_MESSAGE);
+			System.exit(-1);
 		}
 		dburl = dburl + database + "?useSSL=false";
 	}
