@@ -3,8 +3,7 @@
 用于搜索小说，并多线程下载小说。如果配置了mysql数据库，还能够将下载的小说按章节缓存到数据库中。  
 下载策略为：  
 1）在指定的网站（可以通过实现一个抽象方法来动态添加网站，方法见后文）搜索小说，返回结果列表  
-2）选择需要下载的小说后，开始下载。首先搜索数据库，如果在数据库中能找到相关数据，则从数据库中读取数据。之后仍然会读取网站上的小说目录，  
-如果发现章节多于数据库中的章节，则将新的章节下载下来。一方面将新的章节更新入数据库，一方面将数据库中的数据与新下载的内容合并，保存到txt。  
+2）选择需要下载的小说后，开始下载。首先搜索数据库，如果在数据库中能找到相关数据，则从数据库中读取数据。之后仍然会读取网站上的小说目录,如果发现章节多于数据库中的章节，则将新的章节下载下来。一方面将新的章节更新入数据库，一方面将数据库中的数据与新下载的内容合并，保存到txt。  
 PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合，可以查看日志。
 
 ## 添加网站的方法
@@ -39,7 +38,8 @@ CREATE TABLE `books` (
   `websitename` varchar(60) NOT NULL,  
   `websiteurl` varchar(128) NOT NULL,  
   PRIMARY KEY (`bookid`)  
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;  
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 CREATE TABLE `chapters` (  
   `chaptername` varchar(128) DEFAULT NULL,  
   `html` mediumtext,  
@@ -52,36 +52,35 @@ CREATE TABLE `chapters` (
 DELIMITER ;;  
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)  
 BEGIN  
-DECLARE num int DEFAULT -1;  
-DECLARE finalchapter VARCHAR(60);    
-DECLARE weburl VARCHAR(128);  
-DECLARE finalflag TINYINT;  
+  DECLARE num int DEFAULT -1;  
+  DECLARE finalchapter VARCHAR(60);    
+  DECLARE weburl VARCHAR(128);  
+  DECLARE finalflag TINYINT;  
 
-SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal  
-into num,finalchapter,weburl,isfinal FROM books  
-where books.bookname=bookname and books.author=author and books.websitename=websitename;  
-IF (num>0) THEN  
-SET bookid = num;  
-SELECT MAX(chapters.chapterid) into chapterid FROM chapters where chapters.bookid=num;  
-IF (finalchapter != lastchapter OR weburl != websiteurl  OR finalflag != isfinal) THEN  
-UPDATE books SET books.lastchapter=lastchapter,books.isfinal=isfinal,books.websiteurl=websiteurl WHERE books.bookid = bookid;  
-END IF;  
-ELSE  
-INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl)   
-VALUES(author,bookname,isfinal,lastchapter,websitename,websiteurl);  
-SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;  
-set chapterid =0;  
-END IF;  
+  SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal  
+  into num,finalchapter,weburl,isfinal FROM books  
+  where books.bookname=bookname and books.author=author and books.websitename=websitename;  
+  IF (num>0) THEN  
+    SET bookid = num;  
+    SELECT MAX(chapters.chapterid) into chapterid FROM chapters where chapters.bookid=num;  
+    IF (finalchapter != lastchapter OR weburl != websiteurl  OR finalflag != isfinal) THEN  
+      UPDATE books SET books.lastchapter=lastchapter,books.isfinal=isfinal,books.websiteurl=websiteurl WHERE books.bookid = bookid;  
+    END IF;  
+  ELSE  
+    INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl)   
+    VALUES(author,bookname,isfinal,lastchapter,websitename,websiteurl);  
+    SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;     set chapterid =0;  
+  END IF;  
 END;;  
 CREATE DEFINER=`root`@`localhost` PROCEDURE `query_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `websitename` varchar(60),OUT `id` int)  
 BEGIN  
-DECLARE num int DEFAULT -1;  
-SELECT books.bookid into num FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;  
-IF (num>0) THEN  
-SELECT MAX(chapters.chapterid) into id FROM chapters where chapters.bookid=num;  
-ELSE  
-SET id = 0;  
-END IF;  
+  DECLARE num int DEFAULT -1;  
+  SELECT books.bookid into num FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;  
+  IF (num>0) THEN  
+    SELECT MAX(chapters.chapterid) into id FROM chapters where chapters.bookid=num;  
+  ELSE  
+    SET id = 0;  
+  END IF;  
 END;;  
 DELIMITER ;  
 
