@@ -1,5 +1,7 @@
 package website;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -21,17 +23,25 @@ public class DL_biquge extends DLBook{
 
 	@Override
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
-		String SearchUrl = "https://www.qu.la/SearchBook.php?" + 
-							"t=" + new Date().getTime() + "&keyword=" + key;
+		ArrayList<BookBasicInfo> allbookinfo = new ArrayList<BookBasicInfo>();
+		String SearchUrl = null;
+		try {
+			SearchUrl = "https://www.qu.la/SearchBook.php?" + 
+								"t=" + new Date().getTime() + "&keyword=" + URLEncoder.encode(key, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("解码失败(utf-8,biquge):" + key);
+			e.printStackTrace();
+			return allbookinfo;
+		}
 		String htmlinfo = getHtmlInfo(SearchUrl, "utf-8");
-		if (htmlinfo == null) return null;
+		if (htmlinfo == null) return allbookinfo;
 		
 		Document doc = Jsoup.parse(htmlinfo);
 		Elements bookname = doc.select(".s2");
 		Elements lastChapter = doc.select(".s3");
 		Elements author = doc.select(".s4");
 		Elements isfinal = doc.select(".s7");	
-		ArrayList<BookBasicInfo> allbookinfo = new ArrayList<BookBasicInfo>();
+
 		for(int i = 1; i< bookname.size(); i++)
 		{
 			BookBasicInfo bookinfo = new BookBasicInfo();
@@ -45,7 +55,6 @@ public class DL_biquge extends DLBook{
 			bookinfo.setWebsite("笔趣阁");
 			allbookinfo.add(bookinfo);
 		}
-		
 		return allbookinfo;
 	}
 

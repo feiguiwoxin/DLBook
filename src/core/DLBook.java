@@ -9,9 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,7 +20,7 @@ import ui.PanelControl;
 
 public abstract class DLBook {
 	protected ArrayList<BookBasicInfo> bookinfos = null;
-	protected CopyOnWriteArrayList<Chapter> chapters = null;
+	protected ArrayList<Chapter> chapters = null;
 	private PanelControl pc = null;
 	private int poolsize = 8;
 	
@@ -34,6 +32,36 @@ public abstract class DLBook {
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 	protected abstract ArrayList<String> getCatalog(String Url);
 	protected abstract Chapter getChapters(String Url);
+	
+	//给子类用于覆写，由于不是都需要实现，所以设计为非抽象方法。
+	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	{
+		return null;
+	}
+	
+	protected void getbookinfos(int poolsize,ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
+	{
+		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
+		ArrayList<Future<BookBasicInfo>> futures = new ArrayList<Future<BookBasicInfo>>();
+		for(String bookurl:bookurls)
+		{
+			futures.add(pool.submit(new getBookinfo(bookurl, charset)));
+		}
+		pool.shutdown();
+		
+		for(Future<BookBasicInfo> future : futures)
+		{
+			try {
+				BookBasicInfo bookinfo = future.get();
+				if(bookinfo == null) continue;
+				bookinfos.add(bookinfo);
+			} catch (InterruptedException |ExecutionException e) {
+				System.out.println("部分目录获取失败");
+				e.printStackTrace();
+				continue;
+			}
+		}
+	}
 	
 	//内部类，该类用于多线程下载，并返回下载的内容
 	private class DLChapter implements Callable<Chapter>
@@ -73,6 +101,28 @@ public abstract class DLBook {
 			c.setText(text);
 			return c;
 		}
+	}
+	
+	//给子类用于多线程获取书籍信息
+	protected class getBookinfo implements Callable<BookBasicInfo>
+	{
+		private String url;
+		private String charset;
+		
+		public getBookinfo(String url, String charset)
+		{
+			this.url = url;
+			this.charset = charset;
+		}
+		
+		@Override
+		public BookBasicInfo call() throws Exception {
+			String htmlinfo = getHtmlInfo(url, charset);
+			if (htmlinfo == null) return null;
+			
+			BookBasicInfo bookinfo = getbookinfoByhtmlinfo(htmlinfo);
+			return bookinfo;
+		}		
 	}
 	
 	//在构造对象的同时直接生成搜索结果
@@ -206,7 +256,7 @@ public abstract class DLBook {
 	private int DLChapters(BookBasicInfo bookinfo,int chapterid)
 	{
 		chapterid = chapterid<0?0:chapterid;
-		chapters = new CopyOnWriteArrayList<Chapter>();
+		chapters = new ArrayList<Chapter>();
 		pc.setStateMsg("从网络中获取目录",true);
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
 		if(catalogs == null) return -1;
@@ -239,19 +289,10 @@ public abstract class DLBook {
 				successnum++;
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
-				System.out.println("章节缓存失败" + (successnum + failnum));
+				System.out.println("部分章节缓存失败" + (successnum + failnum));
 				continue;
 			}
 		}
-		
-		chapters.sort(new Comparator<Chapter>()
-		{
-			@Override
-			public int compare(Chapter o1, Chapter o2)
-			{
-				return o1.getId() - o2.getId();
-			}
-		});
 		
 		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;

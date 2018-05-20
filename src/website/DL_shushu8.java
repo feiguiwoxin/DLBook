@@ -22,51 +22,34 @@ public class DL_shushu8 extends DLBook{
 
 	@Override
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
+		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
 		String allurl = null;
 		try {
 			allurl = "http://www.shushu8.com/bookso.php?kw=" + URLEncoder.encode(key, "gb2312");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			System.out.println("解码失败(gb2312):"+key);
-			return null;
+			System.out.println("解码失败(gb2312,shushu8):"+key);
+			return bookinfos;
 		}
 		String htmlinfo = getHtmlInfo(allurl, "gb2312");
-		if(htmlinfo == null) return null;
+		if(htmlinfo == null) return bookinfos;
 		
 		Document doc = Jsoup.parse(htmlinfo);
-		ArrayList<String> htmlinfos = new ArrayList<String>();
+		ArrayList<String> bookurls = new ArrayList<String>();
 		if(doc.select(".listconltop>.width369").size() > 0)
 		{
 			Elements indexs = doc.select(".width369.jhfd");
 			for(Element index : indexs)
 			{
-				allurl = "http://www.shushu8.com" + index.getElementsByTag("a").first().attr("href");
-				String info = getHtmlInfo(allurl, "gb2312");
-				if(info == null) continue;
-				htmlinfos.add(info);
+				bookurls.add("http://www.shushu8.com" + index.getElementsByTag("a").first().attr("href"));
 			}
+			this.getbookinfos(8, bookurls, bookinfos, "gb2312");
 		}
 		else
 		{
-			htmlinfos.add(htmlinfo);
+			bookinfos.add(getbookinfoByhtmlinfo(htmlinfo));
 		}
-		
-		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
-		for(String info : htmlinfos)
-		{
-			BookBasicInfo bookinfo = new BookBasicInfo();
-			boolean isfinal = false;
-			doc = Jsoup.parse(info);
-			if(doc.select(".ywjico").size()>0) isfinal = true;
-			bookinfo.setAuthor(doc.select(".author>.black").text());
-			bookinfo.setBookName(doc.select(".r420>h1").text());
-			bookinfo.setBookUrl("http://www.shushu8.com" + doc.select(".diralinks").attr("href"));
-			bookinfo.setLastChapter(doc.select(".lastrecord>strong").text());
-			bookinfo.setIsfinal(isfinal);
-			bookinfo.setWebsite("书书吧");
-			bookinfos.add(bookinfo);
-		}
-			
+
 		return bookinfos;
 	}
 
@@ -97,5 +80,22 @@ public class DL_shushu8 extends DLBook{
 		String text = doc.select("#content").text();
 		if(text.length() == 0) return null;
 		return new Chapter(title, text);
+	}
+	
+	@Override
+	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	{
+		BookBasicInfo bookinfo = new BookBasicInfo();
+		boolean isfinal = false;
+		Document doc = Jsoup.parse(htmlinfo);
+		if(doc.select(".ywjico").size()>0) isfinal = true;
+		bookinfo.setAuthor(doc.select(".author>.black").text());
+		bookinfo.setBookName(doc.select(".r420>h1").text());
+		bookinfo.setBookUrl("http://www.shushu8.com" + doc.select(".diralinks").attr("href"));
+		bookinfo.setLastChapter(doc.select(".lastrecord>strong").text());
+		bookinfo.setIsfinal(isfinal);
+		bookinfo.setWebsite("书书吧");
+		
+		return bookinfo;
 	}
 }

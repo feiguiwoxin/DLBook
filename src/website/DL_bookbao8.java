@@ -1,5 +1,7 @@
 package website;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
@@ -20,35 +22,28 @@ public class DL_bookbao8 extends DLBook{
 
 	@Override
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
-		String allurl = "https://www.bookbao8.com/Search/q_" + key;
+		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
+		String allurl = null;
+		try {
+			allurl = "https://www.bookbao8.com/Search/q_" + URLEncoder.encode(key, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("解码失败(utf-8,bookbao8):" + key);
+			e.printStackTrace();
+			return bookinfos;
+		}
 		String htmlinfo = getHtmlInfo(allurl, "utf-8");
-		if (htmlinfo == null) return null;
+		if (htmlinfo == null) return bookinfos;
 		
 		Document doc = Jsoup.parse(htmlinfo);
-		ArrayList<String> htmlinfos = new ArrayList<String>();
+		ArrayList<String> bookurls = new ArrayList<String>();
 		Elements indexs = doc.select(".txt>.t>a");
 		for(Element index : indexs)
 		{
-			String tmpurl = "https://www.bookbao8.com/" +index.attr("href");
-			htmlinfo = getHtmlInfo(tmpurl, "utf-8");
-			if (htmlinfo != null) htmlinfos.add(htmlinfo);
+			bookurls.add("https://www.bookbao8.com/" +index.attr("href"));
 		}
 		
-		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
-		for(String info : htmlinfos)
-		{
-			BookBasicInfo bookinfo = new BookBasicInfo();
-			doc = Jsoup.parse(info);
-			String finalflag = doc.select("#info>p").get(3).text();
-			bookinfo.setBookName(doc.select("#info>h1").text());
-			bookinfo.setAuthor(doc.select("#info>p>a").first().text());
-			bookinfo.setBookUrl("https://www.bookbao8.com" + doc.select(".am-btn.am-btn-primary.am-btn-sm.am-radius").get(1).attr("href"));
-			bookinfo.setLastChapter(doc.select("#info>p>a").last().text());
-			bookinfo.setIsfinal(finalflag.equals("状态：连载中")?false:true);
-			bookinfo.setWebsite("书包网");
-			bookinfos.add(bookinfo);
-		}
-			
+		this.getbookinfos(2, bookurls, bookinfos, "utf-8");
+		
 		return bookinfos;
 	}
 
@@ -80,5 +75,21 @@ public class DL_bookbao8 extends DLBook{
 		Chapter c = new Chapter(title,text);
 		
 		return c;
+	}
+	
+	@Override
+	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	{
+		BookBasicInfo bookinfo = new BookBasicInfo();
+		Document doc = Jsoup.parse(htmlinfo);
+		String finalflag = doc.select("#info>p").get(3).text();
+		bookinfo.setBookName(doc.select("#info>h1").text());
+		bookinfo.setAuthor(doc.select("#info>p>a").first().text());
+		bookinfo.setBookUrl("https://www.bookbao8.com" + doc.select(".am-btn.am-btn-primary.am-btn-sm.am-radius").get(1).attr("href"));
+		bookinfo.setLastChapter(doc.select("#info>p>a").last().text());
+		bookinfo.setIsfinal(finalflag.equals("状态：连载中")?false:true);
+		bookinfo.setWebsite("书包网");
+		
+		return bookinfo;
 	}
 }

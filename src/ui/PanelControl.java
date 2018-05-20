@@ -51,11 +51,11 @@ public class PanelControl extends JPanel{
 		return textfieldkeyword.getText();
 	}
 	
-	public void addBookinfos(DLBook dlbook, int threadsize)
+	public void addBookinfos(DLBook dlbook)
 	{
 		for(BookBasicInfo bookinfo : dlbook.getBookinfos())
 		{
-			booklists.add(new BookList(bookinfo, dlbook, threadsize));
+			booklists.add(new BookList(bookinfo, dlbook));
 		}
 	}
 	
@@ -92,7 +92,6 @@ public class PanelControl extends JPanel{
 		
 		BookList booklist = booklists.get(selection_pos);	
 		DLBook dlbook = booklist.getDlbook();
-		dlbook.setPoolsize(booklist.getThreadsize());
 		dlbook.SaveIntoFile(booklist.getbookinfo());
 	}
 	

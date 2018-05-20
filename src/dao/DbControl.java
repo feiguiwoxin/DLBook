@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import core.BookBasicInfo;
 import core.Chapter;
@@ -29,7 +28,7 @@ public class DbControl {
 	}
 	
 	//用于更新书籍，如果书籍不存在则存储并缓存所有章节。如果已有部分章节，则只缓存新增章节
-	public void AddBook(BookBasicInfo bookinfo, CopyOnWriteArrayList<Chapter> chapters)
+	public void AddBook(BookBasicInfo bookinfo, ArrayList<Chapter> chapters)
 	{		
 		CallableStatement cs = null;
 		PreparedStatement ps = null;
