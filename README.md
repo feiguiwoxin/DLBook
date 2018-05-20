@@ -1,8 +1,3 @@
-<style>
-p{line-height:36px;}
-li{line-height:36px;}
-</style>
-
 # 功能说明
 用于搜索小说，并多线程下载小说。如果配置了mysql数据库，还能够将下载的小说按章节缓存到数据库中。 
 下载策略为：  
@@ -34,9 +29,7 @@ websites.put("website.DL_bookbao8", 2);
 websites.put("website.DL_shushu8", 8);
 ```
 类似上面那样增加类路径和对该网站下载时使用的多线程数（不得超过16线程，不能低于1线程，否则会被强制为8线程）。  
-<font color="red">
-如果一些网站下载的时候出现一大片因为连接超时导致的下载失败，可以尝试降低线程数。
-</font>  
+如果一些网站下载的时候出现一大片因为连接超时导致的下载失败，可以尝试降低线程数。  
 PS:使用System.out.println()将直接输出到DLBookLog运行日志中。 
 
 
