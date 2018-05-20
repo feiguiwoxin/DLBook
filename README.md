@@ -29,7 +29,7 @@ PS:使用System.out.println()将直接输出到DLBookLog运行日志中。
 3）在数据库中增加如下数据库、数据表和存储过程。
 ### 数据库：
 ```
-CREATE DATABASE test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE book DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ```
 ### 数据表： 
 ```
