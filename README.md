@@ -26,7 +26,11 @@ PS:使用System.out.println()将直接输出到DLBookLog运行日志中。
 如果要实现将数据入数据的功能，要对数据库做一些配置  
 1）网上搜寻一下，将mysql数据的编码字符修改为UTF-8  
 2）在config.properity配置mysql数据库帐号，密码，数据库名。  
-3）在数据库中增加如下数据表和存储过程。  
+3）在数据库中增加如下数据库、数据表和存储过程。
+### 数据库：
+```
+CREATE DATABASE test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+```
 ### 数据表： 
 ```
 CREATE TABLE `books` (  
