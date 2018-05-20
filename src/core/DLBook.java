@@ -24,6 +24,7 @@ public abstract class DLBook {
 	protected ArrayList<BookBasicInfo> bookinfos = null;
 	protected CopyOnWriteArrayList<Chapter> chapters = null;
 	private PanelControl pc = null;
+	private int poolsize = 8;
 	
 	/*实现这3个方法可以添加任意网站进行下载
 	 * getBookInfoByKey用于根据搜索关键字返回搜索结果
@@ -164,7 +165,18 @@ public abstract class DLBook {
 				bw.write(c.getText().replaceAll("<br>", "\r\n") + "\r\n");
 			}
 			chapters = null;
-			pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
+			if(failnum < 0 && null != chaptersindb)
+			{
+				pc.setStateMsg("读取网络目录失败，保存数据库章节:" + chaptersindb.size(), true);
+			}
+			else if(failnum < 0 && null == chaptersindb)
+			{
+				pc.setStateMsg("读取网络目录失败，数据库无数据，没有保存任何数据", true);
+			}
+			else
+			{
+				pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
+			}		
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("写入文件失败" + filename);
@@ -197,9 +209,10 @@ public abstract class DLBook {
 		chapters = new CopyOnWriteArrayList<Chapter>();
 		pc.setStateMsg("从网络中获取目录",true);
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
+		if(catalogs == null) return -1;
 		int id = 0,failnum = 0,successnum = 0,wholenum = catalogs.size() - chapterid;
 		
-		ExecutorService pool = Executors.newFixedThreadPool(8);
+		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
 		ArrayList<Future<Chapter>> futures = new ArrayList<Future<Chapter>>();
 		pc.setStateMsg(String.format("章节共计%d,数据库已缓存%d，需要下载%d", catalogs.size(), chapterid, wholenum),true);
 		for(String catalog : catalogs)
@@ -230,6 +243,7 @@ public abstract class DLBook {
 				continue;
 			}
 		}
+		
 		chapters.sort(new Comparator<Chapter>()
 		{
 			@Override
@@ -238,7 +252,14 @@ public abstract class DLBook {
 				return o1.getId() - o2.getId();
 			}
 		});
+		
 		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;
+	}
+	
+	public void setPoolsize(int poolsize)
+	{
+		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
+		this.poolsize = poolsize;
 	}
 }

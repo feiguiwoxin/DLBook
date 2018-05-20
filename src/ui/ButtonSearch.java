@@ -28,19 +28,19 @@ public class ButtonSearch extends JButton{
 			}
 			lastkey = key;
 			pc.emptySearchRst();
-			pc.setStateMsg(String.format("开始搜索%s(0/%d)", key, websites.length),true);
+			pc.setStateMsg(String.format("开始搜索%s(0/%d)", key, websites.size()),true);
 			setEnabled(false);
 			setText("搜索中...");
 			paintImmediately(0, 0, getWidth(), getHeight());
-			for(String website : websites)
+			for(String website : websites.keySet())
 			{
 				try {
 					Class<?> cls = Class.forName(website);
 					Constructor<?> con = cls.getConstructor(String.class,PanelControl.class);
 					DLBook dlbook = (DLBook) con.newInstance(key, pc);
-					pc.addBookinfos(dlbook);
+					pc.addBookinfos(dlbook, websites.get(website));
 					index++;
-					pc.setStateMsg(String.format("搜索进度(%d/%d)", index, websites.length),true);
+					pc.setStateMsg(String.format("搜索进度(%d/%d)", index, websites.size()),true);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					System.out.println("类操作失败，类名"+website);

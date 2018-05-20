@@ -1,6 +1,7 @@
 package Config;
 
 import java.io.FileReader;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import javax.swing.JOptionPane;
@@ -9,12 +10,17 @@ public class config {
 	public static String username = null;
 	public static String password = null;
 	public static String dburl = "jdbc:mysql://127.0.0.1:3306/";
-	public static String[] websites = {"website.DL_79xs","website.DL_biquge","website.DL_shushu8"};
+	public static LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
 	public static int framew = 0;
 	public static int frameh = 0;
 	
 	static
 	{
+		websites.put("website.DL_79xs", 8);
+		websites.put("website.DL_biquge", 8);
+		websites.put("website.DL_bookbao8", 2);
+		websites.put("website.DL_shushu8", 8);
+		
 		Properties pro = new Properties();
 		String database = null;
 		try {

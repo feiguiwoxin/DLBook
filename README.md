@@ -1,37 +1,57 @@
-# 软件说明
-## 功能说明
-用于搜索小说，并多线程下载小说。如果配置了mysql数据库，还能够将下载的小说按章节缓存到数据库中。  
+<style>
+p{line-height:36px;}
+li{line-height:36px;}
+</style>
+
+# 功能说明
+用于搜索小说，并多线程下载小说。如果配置了mysql数据库，还能够将下载的小说按章节缓存到数据库中。 
 下载策略为：  
-1）在指定的网站（可以通过实现一个抽象方法来动态添加网站，方法见后文）搜索小说，返回结果列表  
-2）选择需要下载的小说后，开始下载。首先搜索数据库，如果在数据库中能找到相关数据，则从数据库中读取数据。之后仍然会读取网站上的小说目录,如果发现章节多于数据库中的章节，则将新的章节下载下来。一方面将新的章节更新入数据库，一方面将数据库中的数据与新下载的内容合并，保存到txt。  
+1. 在指定的网站（可以通过实现一个抽象方法来动态添加网站，方法见后文）搜索小说，返回结果列表；
+2. 搜索数据库，如果在数据库中能找到相关数据，则从数据库中读取数据；
+3. 从网络中读取目录，根据目录章节数与数据库中取得的章节数对比。如果章节数少于数据库中的数据，则不缓存网络章节。如果多于数据库章节数，则缓存多余的部分；
+4. 将新增的章节填入数据库（如果有的话），将数据库获取到的数据和网络中获取到的数据存入txt中。 
 PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合，可以查看日志。
 
-## 添加网站的方法
-### 实现DLBook中的3个抽象方法
-protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);  
-根据搜索关键字返回一个搜索结果列表  
-protected abstract ArrayList<String> getCatalog(String Url);  
-根据小说的网址返回小说的目录信息  
-protected abstract Chapter getChapters(String Url);  
-根据小说章节地址返回小说的章节内容。  
+# 添加网站的方法
+## 实现DLBook中的3个抽象方法
+```
+//根据搜索关键字返回一个搜索结果列表
+protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
+//根据小说的网址返回小说的目录信息
+protected abstract ArrayList<String> getCatalog(String Url);
+//根据小说章节地址返回小说的章节内容
+protected abstract Chapter getChapters(String Url);
+```
 注意：  
-1）getBookInfoByKey返回的BookBasicInfo中的BookUrl将用于getCatalog的输入，getCatalog返回的章节信息用于getChapters的输入。  
-2）尽量对getChapters中的网页内容做前期处理(比如一些广告什么的)，这会使得输出的格式更加合乎阅读要求。  
-### 在cofig类中增加以上新增的类路径  
-public static String[] websites = {"website.DL_79xs","website.DL_biquge","website.DL_shushu8"};  
-在上述数组中添加类路径。  
-PS:使用System.out.println()将直接输出到DLBookLog运行日志中。  
+1. getBookInfoByKey返回的BookBasicInfo中的BookUrl将用于getCatalog的输入，getCatalog返回的Url用于getChapters的输入；
+2. 尽量对getChapters中的网页内容做前期处理(比如一些广告什么的)，这会使得输出的格式更加合乎阅读要求。 
+ 
+## 在config类中增加以上新增的类路径  
+```
+websites.put("website.DL_79xs", 8);
+websites.put("website.DL_biquge", 8);
+websites.put("website.DL_bookbao8", 2);
+websites.put("website.DL_shushu8", 8);
+```
+类似上面那样增加类路径和对该网站下载时使用的多线程数（不得超过16线程，不能低于1线程，否则会被强制为8线程）。  
+<font color="red">
+如果一些网站下载的时候出现一大片因为连接超时导致的下载失败，可以尝试降低线程数。
+</font>  
+PS:使用System.out.println()将直接输出到DLBookLog运行日志中。 
 
-## 配置mysql数据库
-如果要实现将数据入数据的功能，要对数据库做一些配置  
-1）网上搜寻一下，将mysql数据的编码字符修改为UTF-8  
-2）在config.properity配置mysql数据库帐号，密码，数据库名。  
-3）在数据库中增加如下数据库、数据表和存储过程。
-### 数据库：
+
+# 配置mysql数据库
+
+如果要实现将数据入数据的功能，要对数据库做一些配置：  
+1. 网上搜寻一下，将mysql数据的编码字符修改为UTF-8  
+2. 在config.properity配置mysql数据库帐号，密码，数据库名。  
+3. 在数据库中增加如下数据库、数据表和存储过程。
+
+## 数据库：
 ```
 CREATE DATABASE book DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ```
-### 数据表： 
+## 数据表： 
 ```
 CREATE TABLE `books` (  
   `bookid` int(11) NOT NULL AUTO_INCREMENT,  
@@ -54,7 +74,7 @@ CREATE TABLE `chapters` (
   CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`bookid`) REFERENCES `books` (`bookid`)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;  
 ```
-### 存储过程  
+## 存储过程  
 ```
 DELIMITER ;;
 
@@ -93,5 +113,4 @@ END;;
 
 DELIMITER ;  
 ```
-
 
