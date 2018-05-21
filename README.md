@@ -21,8 +21,8 @@ protected abstract String setWebsiteName();
 ```
 注意：  
 1. getBookInfoByKey返回的BookBasicInfo中的BookUrl将用于getCatalog的输入，getCatalog返回的Url用于getChapters的输入；
-2. 尽量对getChapters中的网页内容做前期处理(比如一些广告什么的)，这会使得输出的格式更加合乎阅读要求。 
- 
+2. 尽量对getChapters中的网页内容做前期处理(比如一些广告什么的)，这会使得输出的格式更加合乎阅读要求。
+
 ## 在config类中增加以上新增的类路径  
 ```
 websites.put("website.DL_79xs", 8);
@@ -34,7 +34,19 @@ websites.put("website.DL_shushu8", 8);
 如果一些网站下载的时候出现一大片因为连接超时导致的下载失败，可以尝试降低线程数。  
 PS:使用System.out.println()将直接输出到DLBookLog运行日志中。 
 
+## 可能用到的工具函数
+```
+//说明，以下这些方法并不强制需要实现或调用，而是公用方法来增加爬取效率
 
+//根据网址和编码字符集返回网页内容，会自动重试5次，如果仍然失败，则返回null
+protected String getHtmlInfo(String Urladdress, String charset);
+/*一些网站返回的搜索结果中只包含小说的欢迎页面地址，需要进一步进入这些地址才能怕取到我们想要的内容。
+这两个方法用于多线程爬取这些页面，加快搜索速度*/
+//需要在子类中覆写，根据传入的网页内容返回书籍信息
+protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo);
+//直接调用即可，传入的参数bookurls为待爬取的url集，bookinfos中会自动填入爬取的结果，charset设置编码集
+protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset);
+```
 # 配置mysql数据库
 
 如果要实现将数据入数据的功能，要对数据库做一些配置：  

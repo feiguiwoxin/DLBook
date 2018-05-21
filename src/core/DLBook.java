@@ -20,33 +20,41 @@ import dao.DbControl;
 import ui.PanelControl;
 
 public abstract class DLBook {
-	protected ArrayList<BookBasicInfo> bookinfos = null;
-	protected ArrayList<Chapter> chapters = null;
 	protected String websitename = null;
 	protected PanelControl pc = null;
+	private ArrayList<BookBasicInfo> bookinfos = null;
+	private ArrayList<Chapter> chapters = null;
 	private int poolsize = 8;
 	
-	/*实现这3个方法可以添加任意网站进行下载
+	/*实现这4个方法可以添加任意网站进行下载
 	 * getBookInfoByKey用于根据搜索关键字返回搜索结果
 	 * getCatalog用于根据getBookInfoByKey中的书籍的URL地址返回该书所有章节的URL地址
 	 * getChapters用于根据getCatalog中的章节URL地址返回章节名和内容
+	 * setWebsiteName用于设置网站名，子类间的网站名不得重复
 	 * */
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 	protected abstract ArrayList<String> getCatalog(String Url);
 	protected abstract Chapter getChapters(String Url);
 	protected abstract String setWebsiteName();
 	
-	//给子类用于覆写，由于不是都需要实现，所以设计为非抽象方法。
+	/*部分网站在第一次搜索关键字返回的结果往往不能满足我们的需要，比如我们希望从搜索结果中
+	 * 获得一个能够读取到小说目录的url，但往往搜索结果中返回的是一个小说的欢迎页面，需要在欢迎
+	 * 页面中进一步爬取需要的数据才能够正确的返回搜索结果。如果单线程访问每个搜索结果会使得搜索
+	 * 速度过慢，针对这些网站，可以使用下面这两个方法。*/
+	//如果要多线程爬取搜索结果，必须要实现这个方法，这个方法需要实现传入网页内容，输出书籍搜索信息。
 	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
 	{
 		return null;
 	}
-	
+	/*bookurls:入参，待爬取的HTML地址集
+	 * bookinfos:出参，返回搜索结果集
+	 * charset:入参，网站的编码字符集
+	 * 多线程爬取搜索结果，如果有这方面的需求，可以调用这个函数。*/
 	protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
 	{
 		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
 		ArrayList<Future<BookBasicInfo>> futures = new ArrayList<Future<BookBasicInfo>>();
-		if(bookinfos == null) return;
+		if(bookinfos == null || bookurls == null || charset == null) return;
 		
 		int successnum = 0;
 		for(String bookurl:bookurls)
@@ -70,6 +78,40 @@ public abstract class DLBook {
 		}
 		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
 						new Date(), bookurls.size(), successnum, bookurls.size() - successnum, this.websitename), true);
+	}
+	
+	//根据网址和编码集获取网页内容
+	protected String getHtmlInfo(String Urladdress, String charset)
+	{
+		if(Urladdress == null || charset == null) return null;
+		URL url;
+		StringBuffer result = new StringBuffer();
+		int trytime = 5;
+
+		while(trytime > 0)
+		{
+			try {
+				url = new URL(Urladdress);
+				HttpURLConnection con = (HttpURLConnection)url.openConnection();
+				HttpURLConnection.setFollowRedirects(true);
+				con.setRequestProperty("Connection", "keep-alive");
+				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
+				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+				con.setConnectTimeout(4 * 1000);
+				con.setReadTimeout(4 * 1000);
+				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
+				String line = null;
+				while((line = br.readLine()) != null)
+				{
+					result.append(line+"\r\n");
+				}
+				return result.toString();
+			} catch (Exception e) {
+				System.out.println(Urladdress + "连接超时，重试" + trytime);
+				trytime--;			
+			}
+		}
+		return null;
 	}
 	
 	//内部类，该类用于多线程下载，并返回下载的内容
@@ -112,8 +154,8 @@ public abstract class DLBook {
 		}
 	}
 	
-	//给子类用于多线程获取书籍信息
-	protected class getBookinfo implements Callable<BookBasicInfo>
+	//内部类，用于多线程获取书籍信息
+	private class getBookinfo implements Callable<BookBasicInfo>
 	{
 		private String url;
 		private String charset;
@@ -144,41 +186,9 @@ public abstract class DLBook {
 		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
 		this.poolsize = poolsize;
 		this.websitename = setWebsiteName();
+		if(websitename == null) websitename = this.getClass().getName();
 		this.pc = pc;
 		bookinfos = getBookInfoByKey(key);
-	}
-		
-	//根据网址和编码集获取网页内容
-	protected String getHtmlInfo(String Urladdress, String charset)
-	{
-		URL url;
-		StringBuffer result = new StringBuffer();
-		int trytime = 5;
-
-		while(trytime > 0)
-		{
-			try {
-				url = new URL(Urladdress);
-				HttpURLConnection con = (HttpURLConnection)url.openConnection();
-				HttpURLConnection.setFollowRedirects(true);
-				con.setRequestProperty("Connection", "keep-alive");
-				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
-				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-				con.setConnectTimeout(4 * 1000);
-				con.setReadTimeout(4 * 1000);
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
-				String line = null;
-				while((line = br.readLine()) != null)
-				{
-					result.append(line+"\r\n");
-				}
-				return result.toString();
-			} catch (Exception e) {
-				System.out.println(Urladdress + "连接超时，重试" + trytime);
-				trytime--;			
-			}
-		}
-		return null;
 	}
 	
 	/*如果chapterid=-1，表示数据库出现问题，则直接从网络下载全部章节并保存
@@ -271,9 +281,10 @@ public abstract class DLBook {
 	 * 待全部下载完成后，根据id的顺序进行排序，保证顺序不会错误*/
 	private int DLChapters(BookBasicInfo bookinfo,int chapterid)
 	{
-		chapterid = chapterid<0?0:chapterid;
+		chapterid = chapterid < 0 ? 0 : chapterid;
 		chapters = new ArrayList<Chapter>();
 		pc.setStateMsg("从网络中获取目录",true);
+		if(bookinfo.getBookUrl() == null) return -1;
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
 		if(catalogs == null) return -1;
 		int id = 0,failnum = 0,successnum = 0,wholenum = catalogs.size() - chapterid;
@@ -312,10 +323,5 @@ public abstract class DLBook {
 		
 		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;
-	}
-	
-	public String getwebsitename()
-	{
-		return this.websitename;
 	}
 }

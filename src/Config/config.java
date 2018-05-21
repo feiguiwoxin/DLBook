@@ -1,5 +1,6 @@
 package Config;
 
+import java.awt.Toolkit;
 import java.io.FileReader;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -13,6 +14,8 @@ public class config {
 	public static LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
 	public static int framew = 0;
 	public static int frameh = 0;
+	public static int screenwidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+	public static int screenwheight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 	
 	static
 	{
@@ -28,8 +31,13 @@ public class config {
 			username = pro.getProperty("username");
 			password = pro.getProperty("password");
 			database = pro.getProperty("database");
+			
 			framew = Integer.parseInt(pro.getProperty("width"));
 			frameh = Integer.parseInt(pro.getProperty("height"));
+			framew = framew <= 300 ? 300 : framew;  
+			frameh = frameh <= 200 ? 200 : frameh;
+			framew = framew >= screenwidth? screenwidth : framew;
+			frameh = frameh >= screenwheight? screenwheight : frameh;
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "读取配置文件config.properity失败，请将该文件放置在当前java程序的同一级目录。",

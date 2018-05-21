@@ -78,7 +78,15 @@ public class PanelControl extends JPanel{
 	public void setselection_pos(int pos)
 	{
 		selection_pos = pos;
-		buttondl.setEnabled(true);
+		if(selection_pos >= 0)
+		{
+			buttondl.setEnabled(true);
+		}
+		else
+		{
+			buttondl.setEnabled(false);
+		}
+
 	}
 	
 	public int getselection_pos()
@@ -92,6 +100,8 @@ public class PanelControl extends JPanel{
 		buttondl.setEnabled(false);
 		buttonsearch.paintImmediately(0, 0, buttonsearch.getWidth(), buttonsearch.getHeight());
 		buttondl.paintImmediately(0, 0, buttondl.getWidth(), buttondl.getHeight());
+		
+		if(selection_pos < 0 || booklists.size() == 0) return;
 		
 		BookList booklist = booklists.get(selection_pos);	
 		DLBook dlbook = booklist.getDlbook();
@@ -112,6 +122,7 @@ public class PanelControl extends JPanel{
 	
 	public void setStateMsg(String msg,boolean intolog)
 	{
+		if(msg == null) return;
 		textfieldstat.setText(msg);
 		if(intolog) System.out.println(msg);
 		textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
