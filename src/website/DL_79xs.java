@@ -16,8 +16,8 @@ import ui.PanelControl;
 
 public class DL_79xs extends DLBook{
 
-	public DL_79xs(String key, PanelControl pc) {
-		super(key, pc);
+	public DL_79xs(String key, PanelControl pc,int poolsize) {
+		super(key, pc, poolsize);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class DL_79xs extends DLBook{
 		}
 		
 		//在index页面中进一步获取书籍的主要信息
-		this.getbookinfos(8, bookidxurls, bookinfos, "gb2312");
+		this.getbookinfos(bookidxurls, bookinfos, "gb2312");
 		
 		return;
 	}
@@ -105,8 +105,13 @@ public class DL_79xs extends DLBook{
 		bookinfo.setIsfinal(finalflag);
 		bookinfo.setBookUrl("http://www.79xs.com" + doc.select(".b1>a").attr("href"));
 		bookinfo.setLastChapter(doc.select(".dd2>p>a").text());
-		bookinfo.setWebsite("79小说");
+		bookinfo.setWebsite(websitename);
 		
 		return bookinfo;
+	}
+
+	@Override
+	protected String setWebsiteName() {
+		return "79小说";
 	}
 }

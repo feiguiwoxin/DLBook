@@ -37,9 +37,9 @@ public class ButtonSearch extends JButton{
 			DLBook dlbook = null;
 			try {
 				Class<?> cls = Class.forName(website);
-				Constructor<?> con = cls.getConstructor(String.class,PanelControl.class);
-				dlbook = (DLBook) con.newInstance(key, pc);
-				dlbook.setPoolsize(websites.get(website));
+				Constructor<?> con = cls.getConstructor(String.class,PanelControl.class, int.class);
+				int poolsize = websites.get(website);
+				dlbook = (DLBook) con.newInstance(key, pc, poolsize);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				System.out.println("类操作失败，类名"+website);
@@ -54,7 +54,6 @@ public class ButtonSearch extends JButton{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(!isEnabled()) return;
-			int index = 0;
 			
 			String key = pc.getKey().trim();
 			if(key.equals(lastkey) || key.length() == 0)
@@ -64,7 +63,7 @@ public class ButtonSearch extends JButton{
 			}
 			lastkey = key;
 			pc.emptySearchRst();
-			pc.setStateMsg(String.format("开始搜索%s(0/%d) %s", key, websites.size(),new Date().toString() ),true);
+			pc.setStateMsg(String.format("%tT:开始搜索%s", new Date(), key),true);
 			setEnabled(false);
 			setText("搜索中...");
 			paintImmediately(0, 0, getWidth(), getHeight());
@@ -79,7 +78,6 @@ public class ButtonSearch extends JButton{
 			
 			for(Future<DLBook> future :  futures)
 			{
-				index++;
 				DLBook dlbook = null;
 				try {
 					dlbook = future.get();
@@ -90,10 +88,8 @@ public class ButtonSearch extends JButton{
 				if(dlbook == null) continue;
 				
 				pc.addBookinfos(dlbook);
-				pc.setStateMsg(String.format("搜索进度(%d/%d) %s", index, websites.size(),new Date().toString()),true);
 			}
 			
-			pc.setStateMsg("搜索完成",true);
 			pc.flashtablelist();
 			setEnabled(true);
 			setText("搜索");

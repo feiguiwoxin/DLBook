@@ -16,6 +16,8 @@ protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 protected abstract ArrayList<String> getCatalog(String Url);
 //根据小说章节地址返回小说的章节内容
 protected abstract Chapter getChapters(String Url);
+//返回该网站的网站名，注意，继承的子类之间，网站名不得重复（数据库依靠网站名来区分不同的网站）
+protected abstract String setWebsiteName();
 ```
 注意：  
 1. getBookInfoByKey返回的BookBasicInfo中的BookUrl将用于getCatalog的输入，getCatalog返回的Url用于getChapters的输入；

@@ -13,7 +13,7 @@ public class FrameMain extends JFrame {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		System.setOut(new PrintStream("DLBookLog.txt"));
-		System.out.println(new Date().toString());
+		System.out.println(String.format("%1$tF %1$tT", new Date()));
 		FrameMain frame = new FrameMain();
 		frame.setVisible(true);
 	}

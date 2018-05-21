@@ -18,7 +18,7 @@ public class config {
 	{
 		websites.put("website.DL_79xs", 8);
 		websites.put("website.DL_biquge", 8);
-		websites.put("website.DL_bookbao8", 2);
+		websites.put("website.DL_bookbao8", 3);
 		websites.put("website.DL_shushu8", 8);
 		
 		Properties pro = new Properties();

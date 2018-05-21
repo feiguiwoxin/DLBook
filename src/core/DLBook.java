@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +22,8 @@ import ui.PanelControl;
 public abstract class DLBook {
 	protected ArrayList<BookBasicInfo> bookinfos = null;
 	protected ArrayList<Chapter> chapters = null;
-	private PanelControl pc = null;
+	protected String websitename = null;
+	protected PanelControl pc = null;
 	private int poolsize = 8;
 	
 	/*实现这3个方法可以添加任意网站进行下载
@@ -32,6 +34,7 @@ public abstract class DLBook {
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 	protected abstract ArrayList<String> getCatalog(String Url);
 	protected abstract Chapter getChapters(String Url);
+	protected abstract String setWebsiteName();
 	
 	//给子类用于覆写，由于不是都需要实现，所以设计为非抽象方法。
 	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
@@ -39,10 +42,13 @@ public abstract class DLBook {
 		return null;
 	}
 	
-	protected void getbookinfos(int poolsize,ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
+	protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
 	{
 		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
 		ArrayList<Future<BookBasicInfo>> futures = new ArrayList<Future<BookBasicInfo>>();
+		if(bookinfos == null) return;
+		
+		int successnum = 0;
 		for(String bookurl:bookurls)
 		{
 			futures.add(pool.submit(new getBookinfo(bookurl, charset)));
@@ -55,12 +61,15 @@ public abstract class DLBook {
 				BookBasicInfo bookinfo = future.get();
 				if(bookinfo == null) continue;
 				bookinfos.add(bookinfo);
+				successnum ++;
 			} catch (InterruptedException |ExecutionException e) {
 				System.out.println("部分目录获取失败");
 				e.printStackTrace();
 				continue;
 			}
 		}
+		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+						new Date(), bookurls.size(), successnum, bookurls.size() - successnum, this.websitename), true);
 	}
 	
 	//内部类，该类用于多线程下载，并返回下载的内容
@@ -118,7 +127,11 @@ public abstract class DLBook {
 		@Override
 		public BookBasicInfo call() throws Exception {
 			String htmlinfo = getHtmlInfo(url, charset);
-			if (htmlinfo == null) return null;
+			if (htmlinfo == null)
+			{
+				System.out.println("目录解析失败:" + url);
+				return null;
+			}
 			
 			BookBasicInfo bookinfo = getbookinfoByhtmlinfo(htmlinfo);
 			return bookinfo;
@@ -126,10 +139,13 @@ public abstract class DLBook {
 	}
 	
 	//在构造对象的同时直接生成搜索结果
-	public DLBook(String key, PanelControl pc)
+	public DLBook(String key, PanelControl pc, int poolsize)
 	{
-		bookinfos = getBookInfoByKey(key);
+		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
+		this.poolsize = poolsize;
+		this.websitename = setWebsiteName();
 		this.pc = pc;
+		bookinfos = getBookInfoByKey(key);
 	}
 		
 	//根据网址和编码集获取网页内容
@@ -298,9 +314,8 @@ public abstract class DLBook {
 		return failnum;
 	}
 	
-	public void setPoolsize(int poolsize)
+	public String getwebsitename()
 	{
-		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
-		this.poolsize = poolsize;
+		return this.websitename;
 	}
 }

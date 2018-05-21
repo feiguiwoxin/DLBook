@@ -3,6 +3,7 @@ package website;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_shushu8 extends DLBook{
 
-	public DL_shushu8(String key,PanelControl pc) {
-		super(key, pc);
+	public DL_shushu8(String key,PanelControl pc, int poolsize) {
+		super(key, pc, poolsize);
 	}
 
 	@Override
@@ -43,11 +44,13 @@ public class DL_shushu8 extends DLBook{
 			{
 				bookurls.add("http://www.shushu8.com" + index.getElementsByTag("a").first().attr("href"));
 			}
-			this.getbookinfos(8, bookurls, bookinfos, "gb2312");
+			this.getbookinfos(bookurls, bookinfos, "gb2312");
 		}
 		else
 		{
 			bookinfos.add(getbookinfoByhtmlinfo(htmlinfo));
+			pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+					new Date(), 1, 1, 0, this.websitename), true);
 		}
 
 		return bookinfos;
@@ -94,8 +97,13 @@ public class DL_shushu8 extends DLBook{
 		bookinfo.setBookUrl("http://www.shushu8.com" + doc.select(".diralinks").attr("href"));
 		bookinfo.setLastChapter(doc.select(".lastrecord>strong").text());
 		bookinfo.setIsfinal(isfinal);
-		bookinfo.setWebsite("书书吧");
+		bookinfo.setWebsite(websitename);
 		
 		return bookinfo;
+	}
+	
+	@Override
+	protected String setWebsiteName() {
+		return "书书吧";
 	}
 }

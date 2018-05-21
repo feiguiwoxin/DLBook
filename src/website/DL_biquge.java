@@ -17,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_biquge extends DLBook{
 
-	public DL_biquge(String key, PanelControl pc) {
-		super(key, pc);
+	public DL_biquge(String key, PanelControl pc,int poolsize) {
+		super(key, pc, poolsize);
 	}
 
 	@Override
@@ -52,9 +52,12 @@ public class DL_biquge extends DLBook{
 			if(isfinal.get(i).text().equals("完成")) finalflag = true;
 			bookinfo.setIsfinal(finalflag);
 			bookinfo.setLastChapter(lastChapter.get(i).text());
-			bookinfo.setWebsite("笔趣阁");
+			bookinfo.setWebsite(websitename);
 			allbookinfo.add(bookinfo);
 		}
+		
+		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+				new Date(), allbookinfo.size(), allbookinfo.size(), 0, this.websitename), true);
 		return allbookinfo;
 	}
 
@@ -105,5 +108,10 @@ public class DL_biquge extends DLBook{
 		if(text.length() == 0) return null;
 		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
 		return new Chapter(title, text);
+	}
+	
+	@Override
+	protected String setWebsiteName() {
+		return "笔趣阁";
 	}
 }

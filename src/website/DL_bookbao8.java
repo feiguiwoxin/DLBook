@@ -16,14 +16,15 @@ import ui.PanelControl;
 
 public class DL_bookbao8 extends DLBook{
 
-	public DL_bookbao8(String key, PanelControl pc) {
-		super(key, pc);
+	public DL_bookbao8(String key, PanelControl pc, int poolsize) {
+		super(key, pc, poolsize);
 	}
 
 	@Override
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
 		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
 		String allurl = null;
+		int searchnum = 10;
 		try {
 			allurl = "https://www.bookbao8.com/Search/q_" + URLEncoder.encode(key, "utf-8");
 		} catch (UnsupportedEncodingException e) {
@@ -39,10 +40,12 @@ public class DL_bookbao8 extends DLBook{
 		Elements indexs = doc.select(".txt>.t>a");
 		for(Element index : indexs)
 		{
-			bookurls.add("https://www.bookbao8.com/" +index.attr("href"));
+			searchnum --;
+			if(searchnum < 0) break;
+			bookurls.add("https://www.bookbao8.com" +index.attr("href"));
 		}
 		
-		this.getbookinfos(2, bookurls, bookinfos, "utf-8");
+		this.getbookinfos(bookurls, bookinfos, "utf-8");
 		
 		return bookinfos;
 	}
@@ -88,8 +91,13 @@ public class DL_bookbao8 extends DLBook{
 		bookinfo.setBookUrl("https://www.bookbao8.com" + doc.select(".am-btn.am-btn-primary.am-btn-sm.am-radius").get(1).attr("href"));
 		bookinfo.setLastChapter(doc.select("#info>p>a").last().text());
 		bookinfo.setIsfinal(finalflag.equals("状态：连载中")?false:true);
-		bookinfo.setWebsite("书包网");
+		bookinfo.setWebsite(websitename);
 		
 		return bookinfo;
+	}
+	
+	@Override
+	protected String setWebsiteName() {
+		return "书包网";
 	}
 }
