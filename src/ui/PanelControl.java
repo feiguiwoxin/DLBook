@@ -53,7 +53,10 @@ public class PanelControl extends JPanel{
 	
 	public void addBookinfos(DLBook dlbook)
 	{
-		for(BookBasicInfo bookinfo : dlbook.getBookinfos())
+		ArrayList<BookBasicInfo> bookinfos = dlbook.getBookinfos();
+		if(bookinfos == null) return;
+		
+		for(BookBasicInfo bookinfo : bookinfos)
 		{
 			booklists.add(new BookList(bookinfo, dlbook));
 		}
