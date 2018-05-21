@@ -8,7 +8,7 @@
 PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合，可以查看日志。
 
 # 添加网站的方法
-## 实现DLBook中的3个抽象方法
+## 实现DLBook中的抽象方法
 ```
 //根据搜索关键字返回一个搜索结果列表
 protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
