@@ -90,6 +90,7 @@ public class DbControl {
 						"END;");
 				cs.executeBatch();
 				con.commit();
+				config.setDatabase_state(1);
 				pc.setStateMsg("数据库配置完成",true);
 				WriteStateInfoFile();
 			} catch (SQLException e) {
@@ -100,14 +101,13 @@ public class DbControl {
 			}
 			finally
 			{
-				config.setDatabase_state(1);
 				try {
 					if(cs != null) cs.close();
-					if(con != null) con.close();
-					
+					if(con != null) con.close();				
 				} catch (SQLException e) {
 					System.out.println("关闭资源失败(CreateDb)");
 					e.printStackTrace();
+					config.setDatabase_state(2);
 					return;
 				}
 			}

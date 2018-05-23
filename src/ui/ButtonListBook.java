@@ -1,6 +1,7 @@
 package ui;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 import core.BookBasicInfo;
 import core.DLBook;
@@ -22,7 +23,11 @@ public class ButtonListBook extends JButton{
 		@Override
 		public void mouseClicked(MouseEvent e) 
 		{
-			if(!isEnabled() || config.getDatabase_state() != 1) return;
+			if(!isEnabled() || config.getDatabase_state() != 1)
+			{
+				JOptionPane.showMessageDialog(null, "状态不可用或数据库不可用", "提示", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
 			
 			pc.emptySearchRst();
 			ArrayList<BookBasicInfo> bookinfos = new DbControl(pc).queryallbooks();
