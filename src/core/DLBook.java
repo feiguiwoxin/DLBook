@@ -268,7 +268,6 @@ public abstract class DLBook {
 				return;
 			}
 		}
-		pc.finishDl();
 	}
 	
 	//返回搜索结果集

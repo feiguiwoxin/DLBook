@@ -19,7 +19,45 @@ import core.DLBook;
 @SuppressWarnings("serial")
 public class ButtonSearch extends JButton{
 	private PanelControl pc = null;
-	private String lastkey = null;
+	
+	private class searchthread implements Runnable
+	{
+		private String key;
+		
+		public searchthread(String key)
+		{
+			this.key = key;
+		}
+		
+		@Override
+		public void run() {
+			ArrayList<Future<DLBook>> futures = new ArrayList<Future<DLBook>>();
+			ExecutorService pool = Executors.newCachedThreadPool();
+			for(String website : config.getWebsites().keySet())
+			{
+				futures.add(pool.submit(new searchbook(website, key)));
+			}
+			pool.shutdown();
+			
+			for(Future<DLBook> future :  futures)
+			{
+				DLBook dlbook = null;
+				try {
+					dlbook = future.get();
+				} catch (InterruptedException | ExecutionException e1) {
+					e1.printStackTrace();
+					System.out.println("搜索多线程被打断");
+				}
+				if(dlbook == null) continue;
+				
+				pc.addBookinfos(dlbook);
+			}
+			
+			pc.flashtablelist();
+			setEnabled(true);
+			setText("搜索");			
+		}	
+	}
 	
 	private class searchbook implements Callable<DLBook>
 	{
@@ -56,43 +94,20 @@ public class ButtonSearch extends JButton{
 			if(!isEnabled()) return;
 			
 			String key = pc.getKey().trim();
-			if(key.equals(lastkey) || key.length() == 0)
+			if(key.length() == 0)
 			{
-				pc.setStateMsg("两次搜索结果一致或关键字为空，不进行搜索",false);
+				pc.setStateMsg("关键字为空，不进行搜索",false);
 				return;
 			}
-			lastkey = key;
 			pc.emptySearchRst();
 			pc.setStateMsg(String.format("%tT:开始搜索%s", new Date(), key),true);
 			setEnabled(false);
 			setText("搜索中...");
 			paintImmediately(0, 0, getWidth(), getHeight());
 			
-			ArrayList<Future<DLBook>> futures = new ArrayList<Future<DLBook>>();
-			ExecutorService pool = Executors.newCachedThreadPool();
-			for(String website : config.getWebsites().keySet())
-			{
-				futures.add(pool.submit(new searchbook(website, key)));
-			}
-			pool.shutdown();
-			
-			for(Future<DLBook> future :  futures)
-			{
-				DLBook dlbook = null;
-				try {
-					dlbook = future.get();
-				} catch (InterruptedException | ExecutionException e1) {
-					e1.printStackTrace();
-					System.out.println("搜索多线程被打断");
-				}
-				if(dlbook == null) continue;
-				
-				pc.addBookinfos(dlbook);
-			}
-			
-			pc.flashtablelist();
-			setEnabled(true);
-			setText("搜索");
+			Thread t = new Thread(new searchthread(key));
+			t.start();
+			return;
 		}
 	}
 	

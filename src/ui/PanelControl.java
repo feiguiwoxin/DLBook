@@ -1,5 +1,6 @@
 package ui;
 
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 
@@ -94,25 +95,38 @@ public class PanelControl extends JPanel{
 		return selection_pos;
 	}
 	
+	private class downloadthread implements Runnable
+	{
+		@Override
+		public void run() {
+			BookList booklist = booklists.get(selection_pos);	
+			DLBook dlbook = booklist.getDlbook();
+			
+			dlbook.SaveIntoFile(booklist.getbookinfo());
+			
+			buttonsearch.setEnabled(true);
+			buttondl.setEnabled(true);
+			tablelist.setEnabled(true);
+			tablelist.setForeground(Color.BLACK);
+			Toolkit.getDefaultToolkit().beep();
+			JOptionPane.showMessageDialog(null, "下载完成", "消息提示",JOptionPane.INFORMATION_MESSAGE);
+		}	
+	}
+	
 	public void startDl()
 	{
 		buttonsearch.setEnabled(false);
 		buttondl.setEnabled(false);
+		tablelist.setEnabled(false);
+		tablelist.setForeground(Color.GRAY);
 		buttonsearch.paintImmediately(0, 0, buttonsearch.getWidth(), buttonsearch.getHeight());
 		buttondl.paintImmediately(0, 0, buttondl.getWidth(), buttondl.getHeight());
+		tablelist.paintImmediately(0, 0, tablelist.getWidth(), tablelist.getHeight());
 		
 		if(selection_pos < 0 || booklists.size() == 0) return;
 		
-		BookList booklist = booklists.get(selection_pos);	
-		DLBook dlbook = booklist.getDlbook();
-		dlbook.SaveIntoFile(booklist.getbookinfo());
-	}
-	
-	public void finishDl()
-	{
-		buttonsearch.setEnabled(true);
-		Toolkit.getDefaultToolkit().beep();
-		JOptionPane.showMessageDialog(null, "下载完成", "消息提示",JOptionPane.INFORMATION_MESSAGE);
+		Thread t = new Thread(new downloadthread());
+		t.start();
 	}
 	
 	public void doSearch()

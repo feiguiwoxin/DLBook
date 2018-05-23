@@ -14,7 +14,6 @@ public class TextFieldKeyWord extends JTextField{
 	{
 		this.pc = panelcontrol;
 		setBounds(5, 5, config.getFramew()-150-20-5, 25);
-		setColumns(10);
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {

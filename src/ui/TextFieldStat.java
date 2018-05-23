@@ -9,7 +9,6 @@ public class TextFieldStat extends JTextField{
 	public TextFieldStat()
 	{
 		setBounds(5, config.getFrameh()-35-30+5, config.getFramew()-15, 25);
-		setColumns(10);
 		setEditable(false);			
 	}
 }
