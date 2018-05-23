@@ -2,6 +2,7 @@ package Config;
 
 import java.awt.Toolkit;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 import javax.swing.JOptionPane;
@@ -28,8 +29,10 @@ public class config {
 		websites.put("website.DL_shushu8", 8);
 		
 		OrderProperty pro = new OrderProperty();
+		FileReader fr = null;
 		try {
-			pro.load(new FileReader("./config.properity"));
+			fr = new FileReader("./config.properity");
+			pro.load(fr);
 			username = pro.getProperty("username");
 			password = pro.getProperty("password");
 			database = pro.getProperty("database");
@@ -46,6 +49,15 @@ public class config {
 			JOptionPane.showMessageDialog(null, "读取配置文件config.properity失败，请将该文件放置在当前java程序的同一级目录。",
 											"错误说明", JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
+		}
+		finally
+		{	
+			try {
+				if(fr != null) fr.close();
+			} catch (IOException e) {
+				System.out.println("配置文件关闭失败，配置文件可能被清空");
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -121,9 +121,9 @@ public class DbControl {
 		FileWriter fw = null;
 		try {
 			fr = new FileReader("./config.properity");
-			fw = new FileWriter("./config.properity");
 			pro.load(fr);
 			fr.close();
+			fw = new FileWriter("./config.properity");
 			pro.setProperty("database_state", "1");
 			pro.store(fw);
 		} catch (Exception e) {
@@ -136,7 +136,7 @@ public class DbControl {
 			try {
 				if(fw != null) fw.close();
 			} catch (IOException e) {
-				System.out.println("文件流关闭错误" + e.getMessage());
+				System.out.println("文件流关闭错误，配置文件可能被清空" + e.getMessage());
 				e.printStackTrace();
 				return;
 			}		
