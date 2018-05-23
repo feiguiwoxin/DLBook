@@ -17,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_shushu8 extends DLBook{
 
-	public DL_shushu8(String key,PanelControl pc, int poolsize) {
-		super(key, pc, poolsize);
+	public DL_shushu8(PanelControl pc, int poolsize) {
+		super(pc, poolsize);
 	}
 
 	@Override

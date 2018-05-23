@@ -81,6 +81,6 @@ protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo>
 ```
 # 配置mysql数据库
 
-如果要实现将数据入数据的功能，要对数据库做一些配置：  
+如果要实现将数据入数据库的功能，要对数据库做一些配置：  
 1. 下载并安装mysql数据库，启动mysql数据库 ，将mysql数据库字符集设置为utf-8编码，确保mysql中包含一个名为mysql的数据库（为mysql自带默认数据库）；
 2. 在config.properity配置mysql数据库帐号，密码，数据库名，并确保database_state设置为0。

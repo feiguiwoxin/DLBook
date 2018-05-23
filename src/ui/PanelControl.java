@@ -20,6 +20,7 @@ public class PanelControl extends JPanel{
 	private TextFieldKeyWord textfieldkeyword = null;
 	private TextFieldStat textfieldstat = null;
 	private TableResultList tablelist = null;
+	private ButtonListBook buttonlistbook = null;
 	private ArrayList<BookList> booklists = new ArrayList<BookList>();
 	private int selection_pos = -1;
 	
@@ -32,6 +33,8 @@ public class PanelControl extends JPanel{
 		textfieldkeyword = new TextFieldKeyWord(this);
 		textfieldstat = new TextFieldStat();
 		tablelist = new TableResultList(this);
+		buttonlistbook = new ButtonListBook(this);
+		add(buttonlistbook);
 		add(textfieldkeyword);
 		add(buttonsearch);
 		add(buttondl);
@@ -104,9 +107,7 @@ public class PanelControl extends JPanel{
 			
 			dlbook.SaveIntoFile(booklist.getbookinfo());
 			
-			buttonsearch.setEnabled(true);
-			buttondl.setEnabled(true);
-			tablelist.setEnabled(true);
+			UiEnabled(true);
 			tablelist.setForeground(Color.BLACK);
 			Toolkit.getDefaultToolkit().beep();
 			JOptionPane.showMessageDialog(null, "下载完成", "消息提示",JOptionPane.INFORMATION_MESSAGE);
@@ -115,13 +116,8 @@ public class PanelControl extends JPanel{
 	
 	public void startDl()
 	{
-		buttonsearch.setEnabled(false);
-		buttondl.setEnabled(false);
-		tablelist.setEnabled(false);
+		UiEnabled(false);
 		tablelist.setForeground(Color.GRAY);
-		buttonsearch.paintImmediately(0, 0, buttonsearch.getWidth(), buttonsearch.getHeight());
-		buttondl.paintImmediately(0, 0, buttondl.getWidth(), buttondl.getHeight());
-		tablelist.paintImmediately(0, 0, tablelist.getWidth(), tablelist.getHeight());
 		
 		if(selection_pos < 0 || booklists.size() == 0) return;
 		
@@ -140,5 +136,20 @@ public class PanelControl extends JPanel{
 		textfieldstat.setText(msg);
 		if(intolog) System.out.println(msg);
 		textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
+	}
+	
+	public void UiEnabled(boolean enabled)
+	{
+		buttonlistbook.setEnabled(enabled);
+		buttonsearch.setEnabled(enabled);
+		buttondl.setEnabled(enabled);
+		tablelist.setEnabled(enabled);
+		if(!enabled)
+		{
+			buttonlistbook.paintImmediately(0, 0, buttonlistbook.getWidth(), buttonlistbook.getHeight());
+			buttonsearch.paintImmediately(0, 0, buttonsearch.getWidth(), buttonsearch.getHeight());
+			buttondl.paintImmediately(0, 0, buttondl.getWidth(), buttondl.getHeight());
+			tablelist.paintImmediately(0, 0, tablelist.getWidth(), tablelist.getHeight());
+		}		
 	}
 }

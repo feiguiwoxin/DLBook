@@ -181,14 +181,13 @@ public abstract class DLBook {
 	}
 	
 	//在构造对象的同时直接生成搜索结果
-	public DLBook(String key, PanelControl pc, int poolsize)
+	public DLBook(PanelControl pc, int poolsize)
 	{
 		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
 		this.poolsize = poolsize;
 		this.websitename = setWebsiteName();
 		if(websitename == null) websitename = this.getClass().getName();
 		this.pc = pc;
-		bookinfos = getBookInfoByKey(key);
 	}
 	
 	/*如果chapterid=-1，表示数据库出现问题，则直接从网络下载全部章节并保存
@@ -270,9 +269,20 @@ public abstract class DLBook {
 		}
 	}
 	
+	public void StartSearch(String key)
+	{
+		bookinfos = getBookInfoByKey(key);
+	}
+	
 	//返回搜索结果集
 	public ArrayList<BookBasicInfo> getBookinfos() {
 		return bookinfos;
+	}
+	
+	public void addBookinfo(BookBasicInfo bookinfo)
+	{
+		if(bookinfos == null) bookinfos = new ArrayList<BookBasicInfo>();
+		bookinfos.add(bookinfo);
 	}
 	
 	/*根据几个重要的抽象方法多线程下载小说到本地缓存。
@@ -322,5 +332,8 @@ public abstract class DLBook {
 		
 		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;
+	}
+	public String getWebsitename() {
+		return websitename;
 	}
 }

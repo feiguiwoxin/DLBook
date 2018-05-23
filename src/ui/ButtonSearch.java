@@ -54,7 +54,7 @@ public class ButtonSearch extends JButton{
 			}
 			
 			pc.flashtablelist();
-			setEnabled(true);
+			pc.UiEnabled(true);
 			setText("搜索");			
 		}	
 	}
@@ -75,9 +75,10 @@ public class ButtonSearch extends JButton{
 			DLBook dlbook = null;
 			try {
 				Class<?> cls = Class.forName(website);
-				Constructor<?> con = cls.getConstructor(String.class,PanelControl.class, int.class);
+				Constructor<?> con = cls.getConstructor(PanelControl.class, int.class);
 				int poolsize = config.getWebsites().get(website);
-				dlbook = (DLBook) con.newInstance(key, pc, poolsize);
+				dlbook = (DLBook) con.newInstance(pc, poolsize);
+				dlbook.StartSearch(key);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				System.out.println("类操作失败，类名"+website);
@@ -101,9 +102,8 @@ public class ButtonSearch extends JButton{
 			}
 			pc.emptySearchRst();
 			pc.setStateMsg(String.format("%tT:开始搜索%s", new Date(), key),true);
-			setEnabled(false);
 			setText("搜索中...");
-			paintImmediately(0, 0, getWidth(), getHeight());
+			pc.UiEnabled(false);
 			
 			Thread t = new Thread(new searchthread(key));
 			t.start();

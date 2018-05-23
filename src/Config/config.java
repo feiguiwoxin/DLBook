@@ -40,7 +40,7 @@ public class config {
 			
 			framew = Integer.parseInt(pro.getProperty("width", "480"));
 			frameh = Integer.parseInt(pro.getProperty("height", "600"));
-			framew = framew <= 300 ? 300 : framew;  
+			framew = framew <= 400 ? 400 : framew;  
 			frameh = frameh <= 200 ? 200 : frameh;
 			framew = framew >= screenwidth? screenwidth : framew;
 			frameh = frameh >= screenwheight? screenwheight : frameh;

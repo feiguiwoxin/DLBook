@@ -17,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_biquge extends DLBook{
 
-	public DL_biquge(String key, PanelControl pc,int poolsize) {
-		super(key, pc, poolsize);
+	public DL_biquge(PanelControl pc,int poolsize) {
+		super(pc, poolsize);
 	}
 
 	@Override

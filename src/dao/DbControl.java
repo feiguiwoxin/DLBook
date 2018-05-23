@@ -302,4 +302,42 @@ public class DbControl {
 		
 		return chapters;
 	}
+	
+	public ArrayList<BookBasicInfo> queryallbooks()
+	{
+		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
+		PreparedStatement ps = null;
+		try {
+			OpenConnection();
+			ps = con.prepareStatement("select * from books");
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+			{
+				BookBasicInfo bookinfo = new BookBasicInfo();
+				bookinfo.setBookName(rs.getString(2));
+				bookinfo.setAuthor(rs.getString(3));
+				bookinfo.setBookUrl(rs.getString(8));
+				bookinfo.setIsfinal(rs.getInt(5) == 1 ? true : false);
+				bookinfo.setLastChapter(rs.getString(4));
+				bookinfo.setWebsite(rs.getString(7));
+				bookinfos.add(bookinfo);
+			}
+		} catch (SQLException e) {
+			pc.setStateMsg("加载缓存失败,请检查数据库是否运行，或帐号密码是否正确", true);
+			e.printStackTrace();
+			return bookinfos;
+		}
+		finally
+		{
+			try {
+				if(con!=null) con.close();
+			} catch (SQLException e) {
+				System.out.println("关闭sql失败(queryallbooks):"+e.getMessage());
+				e.printStackTrace();
+				return bookinfos; 
+			}
+			
+		}
+		return bookinfos;
+	}
 }
