@@ -7,6 +7,38 @@
 4. 将新增的章节填入数据库（如果有的话），将数据库获取到的数据和网络中获取到的数据存入txt中。  
 PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合，可以查看日志。
 
+# 配置文件说明
+相关配置文件说明如下：
+<table>
+	<th>配置</th>
+	<th>说明</th>
+	<tr>
+		<td>width</td>
+		<td>软件宽度</td>
+	</tr>
+	<tr>
+		<td>height</td>
+		<td>软件高度</td>
+	</tr>
+	<tr>
+		<td>username</td>
+		<td>数据库帐号</td>
+	</tr>
+	<tr>
+		<td>password</td>
+		<td>数据库密码</td>
+	</tr>
+	<tr>
+		<td>database</td>
+		<td>数据库名</td>
+	</tr>
+	<tr>
+		<td>database_state</td>
+		<td>0:需要重新配置数据库 <br>1:不需要重新配置数据库</td>
+	</tr>
+</table>
+
+
 # 添加网站的方法
 ## 实现DLBook中的抽象方法
 ```
@@ -50,74 +82,5 @@ protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo>
 # 配置mysql数据库
 
 如果要实现将数据入数据的功能，要对数据库做一些配置：  
-1. 网上搜寻一下，将mysql数据的编码字符修改为UTF-8  
-2. 在config.properity配置mysql数据库帐号，密码，数据库名。  
-3. 在数据库中增加如下数据库、数据表和存储过程。
-
-## 数据库：
-```
-CREATE DATABASE book DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-```
-## 数据表： 
-```
-CREATE TABLE `books` (  
-  `bookid` int(11) NOT NULL AUTO_INCREMENT,  
-  `bookname` varchar(60) DEFAULT NULL,  
-  `author` varchar(60) DEFAULT NULL,  
-  `lastchapter` varchar(128) DEFAULT NULL,  
-  `isfinal` tinyint(1) DEFAULT NULL,  
-  `updatetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
-  `websitename` varchar(60) NOT NULL,  
-  `websiteurl` varchar(128) NOT NULL,  
-  PRIMARY KEY (`bookid`)  
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-CREATE TABLE `chapters` (  
-  `chaptername` varchar(128) DEFAULT NULL,  
-  `html` mediumtext,  
-  `bookid` int(11) NOT NULL,  
-  `chapterid` int(11) NOT NULL,  
-  PRIMARY KEY (`bookid`,`chapterid`),  
-  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`bookid`) REFERENCES `books` (`bookid`)  
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;  
-```
-## 存储过程  
-```
-DELIMITER ;;
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)  
-BEGIN  
-  DECLARE num int DEFAULT -1;  
-  DECLARE finalchapter VARCHAR(60);    
-  DECLARE weburl VARCHAR(128);  
-  DECLARE finalflag TINYINT;  
-  SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal  
-  into num,finalchapter,weburl,isfinal FROM books  
-  where books.bookname=bookname and books.author=author and books.websitename=websitename;  
-  IF (num>0) THEN  
-    SET bookid = num;  
-    SELECT MAX(chapters.chapterid) into chapterid FROM chapters where chapters.bookid=num;  
-    IF (finalchapter != lastchapter OR weburl != websiteurl  OR finalflag != isfinal) THEN  
-      UPDATE books SET books.lastchapter=lastchapter,books.isfinal=isfinal,books.websiteurl=websiteurl WHERE books.bookid = bookid;  
-    END IF;  
-  ELSE  
-    INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl)   
-    VALUES(author,bookname,isfinal,lastchapter,websitename,websiteurl);  
-    SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;     set chapterid =0;  
-  END IF;  
-END;;  
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `query_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `websitename` varchar(60),OUT `id` int)  
-BEGIN  
-  DECLARE num int DEFAULT -1;  
-  SELECT books.bookid into num FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;  
-  IF (num>0) THEN  
-    SELECT MAX(chapters.chapterid) into id FROM chapters where chapters.bookid=num;  
-  ELSE  
-    SET id = 0;  
-  END IF;  
-END;;  
-
-DELIMITER ;  
-```
-
+1. 下载并安装mysql数据库，启动mysql数据库 ，将mysql数据库字符集设置为utf-8编码，确保mysql中包含一个名为mysql的数据库（为mysql自带默认数据库）；
+2. 在config.properity配置mysql数据库帐号，密码，数据库名，并确保database_state设置为0。

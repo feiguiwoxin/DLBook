@@ -4,6 +4,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
+
 import static Config.config.*;
 
 @SuppressWarnings("serial")
@@ -17,6 +19,11 @@ public class ButtonDl extends JButton{
 		{
 			if (isEnabled() && pc.getselection_pos() >= 0)
 			{
+				if(config.getDatabase_state()  == 0)
+				{
+					JOptionPane.showMessageDialog(null, "请稍候，后台正在初始化数据库资源", "提示", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
 				pc.startDl();
 			}
 		}
@@ -27,7 +34,7 @@ public class ButtonDl extends JButton{
 		this.pc = pc;
 		setText("下载");
 		setEnabled(false);
-		setBounds(framew - 75 - 10, 5, 75, 25);
+		setBounds(config.getFramew() - 75 - 10, 5, 75, 25);
 		addMouseListener(new ClickDl());
 	}
 }

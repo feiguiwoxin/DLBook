@@ -1,25 +1,156 @@
 package dao;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 
+import Config.OrderProperty;
 import core.BookBasicInfo;
 import core.Chapter;
+import ui.PanelControl;
 
 import static Config.config.*;
 
 public class DbControl {
-	private static Connection con = null;
+	private Connection con = null;
+	private PanelControl pc = null;
+	
+	private class CreateDb implements Runnable
+	{
+		@Override
+		public void run() {
+			Statement cs = null;
+			pc.setStateMsg("开始配置数据库", true);
+			try {
+				con = DriverManager.getConnection(config.getDburl() + "mysql?useSSL=false", config.getUsername(), config.getPassword());
+				con.setAutoCommit(false);
+				cs = con.createStatement();
+				cs.addBatch("CREATE DATABASE IF NOT EXISTS " + config.getDatabase() + " DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;");
+				cs.addBatch("use " +  config.getDatabase() + ";");
+				cs.addBatch("CREATE TABLE IF NOT EXISTS `books` (" + 
+						"  `bookid` int(11) NOT NULL AUTO_INCREMENT," + 
+						"  `bookname` varchar(60) DEFAULT NULL," + 
+						"  `author` varchar(60) DEFAULT NULL," + 
+						"  `lastchapter` varchar(128) DEFAULT NULL," + 
+						"  `isfinal` tinyint(1) DEFAULT NULL," + 
+						"  `updatetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," + 
+						"  `websitename` varchar(60) NOT NULL," + 
+						"  `websiteurl` varchar(128) NOT NULL," + 
+						"  PRIMARY KEY (`bookid`)" + 
+						") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
+				cs.addBatch("CREATE TABLE  IF NOT EXISTS `chapters` (" + 
+						"  `chaptername` varchar(128) DEFAULT NULL," + 
+						"  `html` mediumtext," + 
+						"  `bookid` int(11) NOT NULL," + 
+						"  `chapterid` int(11) NOT NULL," + 
+						"  PRIMARY KEY (`bookid`,`chapterid`)," + 
+						"  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`bookid`) REFERENCES `books` (`bookid`)" + 
+						") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+				cs.addBatch("DROP PROCEDURE IF EXISTS insert_bookinfo;");
+				cs.addBatch("DROP PROCEDURE IF EXISTS query_bookinfo;");
+				cs.addBatch("CREATE PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)" + 
+						"BEGIN" + 
+						"  DECLARE num int DEFAULT -1;" + 
+						"  DECLARE finalchapter VARCHAR(60);" + 
+						"  DECLARE weburl VARCHAR(128);" + 
+						"  DECLARE finalflag TINYINT;" + 
+						"  SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal" + 
+						"  into num,finalchapter,weburl,isfinal FROM books" + 
+						"  where books.bookname=bookname and books.author=author and books.websitename=websitename;" + 
+						"  IF (num>0) THEN" + 
+						"    SET bookid = num;" + 
+						"    SELECT MAX(chapters.chapterid) into chapterid FROM chapters where chapters.bookid=num;" + 
+						"    IF (finalchapter != lastchapter OR weburl != websiteurl  OR finalflag != isfinal) THEN" + 
+						"      UPDATE books SET books.lastchapter=lastchapter,books.isfinal=isfinal,books.websiteurl=websiteurl WHERE books.bookid = bookid;  \r\n" + 
+						"    END IF;" + 
+						"  ELSE" + 
+						"    INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl)" + 
+						"    VALUES(author,bookname,isfinal,lastchapter,websitename,websiteurl);" + 
+						"    SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;     set chapterid =0;" + 
+						"  END IF;" + 
+						"END;");
+				cs.addBatch("CREATE PROCEDURE `query_bookinfo` (IN `bookname` varchar(60),IN `author` varchar(60),IN `websitename` varchar(60),OUT `id` int)" + 
+						"BEGIN" + 
+						"  DECLARE num int DEFAULT -1;" + 
+						"  SELECT books.bookid into num FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;" + 
+						"  IF (num>0) THEN" + 
+						"    SELECT MAX(chapters.chapterid) into id FROM chapters where chapters.bookid=num;" + 
+						"  ELSE" + 
+						"    SET id = 0;" + 
+						"  END IF;" + 
+						"END;");
+				cs.executeBatch();
+				con.commit();
+				pc.setStateMsg("数据库配置完成",true);
+				WriteStateInfoFile();
+			} catch (SQLException e) {
+				config.setDatabase_state(2);
+				pc.setStateMsg("初始化数据库失败,如需使用数据库，在确认配置后重新打开本程序。",true);
+				e.printStackTrace();
+				return;
+			}
+			finally
+			{
+				config.setDatabase_state(1);
+				try {
+					if(cs != null) cs.close();
+					if(con != null) con.close();
+					
+				} catch (SQLException e) {
+					System.out.println("关闭资源失败(CreateDb)");
+					e.printStackTrace();
+					return;
+				}
+			}
+		}	
+	}
+	
+	private void WriteStateInfoFile()
+	{
+		OrderProperty pro = new OrderProperty();
+		FileReader fr = null;
+		FileWriter fw = null;
+		try {
+			fr = new FileReader("./config.properity");
+			fw = new FileWriter("./config.properity");
+			pro.load(fr);
+			fr.close();
+			pro.setProperty("database_state", "1");
+			pro.store(fw);
+		} catch (Exception e) {
+			System.out.println("写入database_state失败"+e.getMessage());
+			e.printStackTrace();
+			return;
+		}
+		finally 
+		{
+			try {
+				if(fw != null) fw.close();
+			} catch (IOException e) {
+				System.out.println("文件流关闭错误" + e.getMessage());
+				e.printStackTrace();
+				return;
+			}		
+		}
+	}
+	
+	public DbControl(PanelControl pc)
+	{
+		this.pc = pc;
+	}
 	
 	private void OpenConnection() throws SQLException
 	{
-		con = DriverManager.getConnection(dburl, username, password);
+		con = DriverManager.getConnection(config.getDburl() + config.getDatabase() + "?useSSL=false", config.getUsername(), config.getPassword());
 	}
 	
 	private void CloseConnection() throws SQLException
@@ -27,9 +158,22 @@ public class DbControl {
 		con.close();
 	}
 	
+	public void initDb()
+	{
+		if(config.getDatabase_state() != 0)
+		{
+			config.setDatabase_state(1);
+			pc.setStateMsg("读取配置成功，当前状态为数据库已配置", true);
+			return;
+		}
+		Thread t = new Thread(new CreateDb());
+		t.start();		
+	}
+	
 	//用于更新书籍，如果书籍不存在则存储并缓存所有章节。如果已有部分章节，则只缓存新增章节
 	public void AddBook(BookBasicInfo bookinfo, ArrayList<Chapter> chapters)
-	{		
+	{
+		if (config.getDatabase_state() != 1) return;
 		CallableStatement cs = null;
 		PreparedStatement ps = null;
 		
@@ -83,6 +227,7 @@ public class DbControl {
 	//查询书籍的最新章节信息，如果没有书籍，则返回-1或0
 	public int queryBookInfo(BookBasicInfo bookinfo)
 	{
+		if (config.getDatabase_state()  != 1) return -1;
 		CallableStatement cs = null;
 		int id = 0;
 		
@@ -119,6 +264,7 @@ public class DbControl {
 	{
 		PreparedStatement ps = null;
 		ArrayList<Chapter> chapters = new ArrayList<Chapter>();
+		if (config.getDatabase_state()  != 1) return chapters;
 		try {
 			this.OpenConnection();
 			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=?;");

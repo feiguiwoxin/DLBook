@@ -41,7 +41,7 @@ public class PanelControl extends JPanel{
 	private void addTable()
 	{
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(5, 35, framew-15, frameh-35-35-30);
+		scrollPane.setBounds(5, 35, config.getFramew()-15, config.getFrameh()-35-35-30);
 		scrollPane.setViewportView(tablelist);
 		add(scrollPane);				
 	}

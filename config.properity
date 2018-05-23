@@ -1,5 +1,6 @@
+width=600
+height=480
 username=root
 password=mysql
 database=book
-width=600
-height=480
+database_state=0

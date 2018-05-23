@@ -202,7 +202,7 @@ public abstract class DLBook {
 		BufferedWriter bw = null;
 		int failnum = 0;
 		
-		DbControl db = new DbControl();
+		DbControl db = new DbControl(pc);
 		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));
 		pc.setStateMsg("正在从数据库中获取已存储的章节",true);
 		int chapterid = db.queryBookInfo(bookinfo);

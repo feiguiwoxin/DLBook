@@ -38,7 +38,7 @@ public class ButtonSearch extends JButton{
 			try {
 				Class<?> cls = Class.forName(website);
 				Constructor<?> con = cls.getConstructor(String.class,PanelControl.class, int.class);
-				int poolsize = websites.get(website);
+				int poolsize = config.getWebsites().get(website);
 				dlbook = (DLBook) con.newInstance(key, pc, poolsize);
 			} catch (Exception e1) {
 				e1.printStackTrace();
@@ -70,7 +70,7 @@ public class ButtonSearch extends JButton{
 			
 			ArrayList<Future<DLBook>> futures = new ArrayList<Future<DLBook>>();
 			ExecutorService pool = Executors.newCachedThreadPool();
-			for(String website : websites.keySet())
+			for(String website : config.getWebsites().keySet())
 			{
 				futures.add(pool.submit(new searchbook(website, key)));
 			}
@@ -100,7 +100,7 @@ public class ButtonSearch extends JButton{
 	{
 		this.pc = pc;
 		setText("搜索");
-		setBounds(framew - 150 - 15, 5, 75, 25);
+		setBounds(config.getFramew() - 150 - 15, 5, 75, 25);
 		this.addActionListener(new MouseClick());
 	}
 }

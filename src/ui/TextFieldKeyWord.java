@@ -13,7 +13,7 @@ public class TextFieldKeyWord extends JTextField{
 	public TextFieldKeyWord(PanelControl panelcontrol)
 	{
 		this.pc = panelcontrol;
-		setBounds(5, 5, framew-150-20-5, 25);
+		setBounds(5, 5, config.getFramew()-150-20-5, 25);
 		setColumns(10);
 		addKeyListener(new KeyAdapter() {
 			@Override

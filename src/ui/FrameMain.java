@@ -5,6 +5,9 @@ import java.io.PrintStream;
 import java.util.Date;
 
 import javax.swing.JFrame;
+
+import dao.DbControl;
+
 import static Config.config.*;
 
 @SuppressWarnings("serial")
@@ -21,6 +24,7 @@ public class FrameMain extends JFrame {
 	{
 		setMainFrame();
 		PanelControl pc = new PanelControl();
+		new DbControl(pc).initDb();
 		setContentPane(pc);
 	}
 	
@@ -29,6 +33,6 @@ public class FrameMain extends JFrame {
 		setResizable(false);
 		setTitle("小说下载器");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
-		setBounds(screenwidth/2 - framew/2, screenwheight/2- frameh/2, framew, frameh);
+		setBounds(config.getScreenwidth()/2 - config.getFramew()/2, config.getScreenwheight()/2- config.getFrameh()/2, config.getFramew(), config.getFrameh());
 	}
 }
