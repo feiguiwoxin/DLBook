@@ -21,8 +21,16 @@ import ui.PanelControl;
 import static Config.config.*;
 
 public class DbControl {
+	public final static DbControl dbcontrol = new DbControl();
 	private Connection con = null;
 	private PanelControl pc = null;
+	
+	private DbControl(){}
+	
+	public void setPC(PanelControl pc)
+	{
+		this.pc = pc;
+	}
 	
 	private class CreateDb implements Runnable
 	{
@@ -103,7 +111,7 @@ public class DbControl {
 			{
 				try {
 					if(cs != null) cs.close();
-					if(con != null) con.close();				
+					CloseConnection();				
 				} catch (SQLException e) {
 					System.out.println("关闭资源失败(CreateDb)");
 					e.printStackTrace();
@@ -143,11 +151,6 @@ public class DbControl {
 		}
 	}
 	
-	public DbControl(PanelControl pc)
-	{
-		this.pc = pc;
-	}
-	
 	private void OpenConnection() throws SQLException
 	{
 		con = DriverManager.getConnection(config.getDburl() + config.getDatabase() + "?useSSL=false", config.getUsername(), config.getPassword());
@@ -155,7 +158,10 @@ public class DbControl {
 	
 	private void CloseConnection() throws SQLException
 	{
-		con.close();
+		if(con != null)
+		{
+			con.close();
+		}
 	}
 	
 	public void initDb()
@@ -215,7 +221,7 @@ public class DbControl {
 			try {
 				if (cs != null) cs.close();
 				if (ps != null) ps.close();
-				if (con != null) this.CloseConnection();
+				CloseConnection();
 			} catch (SQLException e) {
 				System.out.println("操作数据库失败(AddBook),关闭资源失败"+e.getMessage());
 				e.printStackTrace();
@@ -250,7 +256,7 @@ public class DbControl {
 		{
 			try {
 				if (cs != null) cs.close();
-				if (con != null) this.CloseConnection();
+				CloseConnection();
 			} catch (SQLException e) {
 				System.out.println("操作数据库失败，关闭资源失败(queryBookInfo)"+e.getMessage());
 				e.printStackTrace();
@@ -292,7 +298,7 @@ public class DbControl {
 		{
 			try {
 				if (ps != null) ps.close();
-				if (con != null) this.CloseConnection();
+				CloseConnection();
 			} catch (SQLException e) {
 				System.out.println("操作数据库失败，关闭资源失败(getbookchapters):"+e.getMessage());
 				e.printStackTrace();
@@ -330,7 +336,7 @@ public class DbControl {
 		finally
 		{
 			try {
-				if(con!=null) con.close();
+				CloseConnection();
 			} catch (SQLException e) {
 				System.out.println("关闭sql失败(queryallbooks):"+e.getMessage());
 				e.printStackTrace();
@@ -339,5 +345,51 @@ public class DbControl {
 			
 		}
 		return bookinfos;
+	}
+	
+	public boolean DeleteBook(BookBasicInfo bookinfo)
+	{
+		int bookid = -1;
+		PreparedStatement ps = null;
+		try {
+			OpenConnection();
+			con.setAutoCommit(false);
+			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=?;");
+			ps.setString(1, bookinfo.getBookName());
+			ps.setString(2, bookinfo.getAuthor());
+			ps.setString(3, bookinfo.getWebsite());
+			ResultSet rs = ps.executeQuery();
+			rs.last();
+			if(rs.getRow() == 0) return false;
+			bookid = rs.getInt(1);
+			ps.close();
+			
+			ps = con.prepareStatement("delete from chapters where bookid=?;");
+			ps.setInt(1, bookid);
+			ps.executeUpdate();
+			ps.close();
+			ps = con.prepareStatement("delete from books where bookid=?");
+			ps.setInt(1, bookid);
+			ps.executeUpdate();
+			ps.close();
+			
+			con.commit();
+			pc.setStateMsg("删除书籍成功", true);
+		} catch (SQLException e) {
+			pc.setStateMsg("数据库错误,删除书籍失败", true);
+			e.printStackTrace();
+			return false;
+		}
+		finally
+		{
+			try {
+				CloseConnection();
+			} catch (SQLException e) {
+				System.out.println("关闭sql失败(queryallbooks):"+e.getMessage());
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;
 	}
 }

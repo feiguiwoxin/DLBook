@@ -201,13 +201,12 @@ public abstract class DLBook {
 		BufferedWriter bw = null;
 		int failnum = 0;
 		
-		DbControl db = new DbControl(pc);
 		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));
 		pc.setStateMsg("正在从数据库中获取已存储的章节",true);
-		int chapterid = db.queryBookInfo(bookinfo);
+		int chapterid = DbControl.dbcontrol.queryBookInfo(bookinfo);
 		if(chapterid > 0)
 		{
-			chaptersindb = db.getbookchapters(bookinfo);
+			chaptersindb = DbControl.dbcontrol.getbookchapters(bookinfo);
 			if (chaptersindb == null)
 			{
 				pc.setStateMsg("数据库获取数据失败，开始从网络下载",true);
@@ -219,7 +218,7 @@ public abstract class DLBook {
 			}
 		}		
 		if(chapters == null) failnum = DLChapters(bookinfo, chapterid);
-		if(chapterid != -1) db.AddBook(bookinfo, chapters);		
+		if(chapterid != -1) DbControl.dbcontrol.AddBook(bookinfo, chapters);		
 
 		pc.setStateMsg("将数据写入txt文本中",true);
 		try {

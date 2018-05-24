@@ -29,9 +29,14 @@ public class ButtonListBook extends JButton{
 				return;
 			}
 			
+			pc.UiEnabled(false);
 			pc.emptySearchRst();
-			ArrayList<BookBasicInfo> bookinfos = new DbControl(pc).queryallbooks();
-			if(bookinfos == null || bookinfos.size() == 0) return;
+			ArrayList<BookBasicInfo> bookinfos = DbControl.dbcontrol.queryallbooks();
+			if(bookinfos.size() == 0)
+			{
+				pc.UiEnabled(true);
+				return;
+			}
 			
 			ArrayList<DLBook> dlbooks = new ArrayList<DLBook>();
 			for(String website : config.getWebsites().keySet())
@@ -66,15 +71,16 @@ public class ButtonListBook extends JButton{
 				pc.addBookinfos(book);
 			}
 			
+			config.setCan_delete(true);
 			pc.flashtablelist();
-			setEnabled(true);
+			pc.UiEnabled(true);
 		}
 	}
 	
 	public ButtonListBook(PanelControl pc)
 	{
 		this.pc = pc;
-		setBounds(config.getFramew() - 225 - 20, 5, 75, 25);
+		setBounds(config.getFramew() - 300 - 25, 5, 75, 25);
 		setText("缓存");
 		addMouseListener(new ClickListBook());
 	}

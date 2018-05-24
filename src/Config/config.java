@@ -14,6 +14,7 @@ public class config {
 	private String password = null;
 	private String database = null;
 	private int database_state = 0;
+	private boolean can_delete = false;
 	private String dburl = "jdbc:mysql://127.0.0.1:3306/";
 	private LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
 	private int framew = 0;
@@ -40,7 +41,7 @@ public class config {
 			
 			framew = Integer.parseInt(pro.getProperty("width", "480"));
 			frameh = Integer.parseInt(pro.getProperty("height", "600"));
-			framew = framew <= 400 ? 400 : framew;  
+			framew = framew <= 480 ? 480 : framew;  
 			frameh = frameh <= 200 ? 200 : frameh;
 			framew = framew >= screenwidth? screenwidth : framew;
 			frameh = frameh >= screenwheight? screenwheight : frameh;
@@ -103,5 +104,13 @@ public class config {
 
 	public void setDatabase_state(int database_state) {
 		this.database_state = database_state;
+	}
+
+	public boolean isCan_delete() {
+		return can_delete;
+	}
+
+	public void setCan_delete(boolean can_delete) {
+		this.can_delete = can_delete;
 	}
 }

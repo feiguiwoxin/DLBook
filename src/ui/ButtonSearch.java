@@ -53,6 +53,7 @@ public class ButtonSearch extends JButton{
 				pc.addBookinfos(dlbook);
 			}
 			
+			config.setCan_delete(false);
 			pc.flashtablelist();
 			pc.UiEnabled(true);
 			setText("搜索");			
