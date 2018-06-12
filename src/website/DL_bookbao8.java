@@ -24,7 +24,8 @@ public class DL_bookbao8 extends DLBook{
 	protected ArrayList<BookBasicInfo> getBookInfoByKey(String key) {
 		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
 		String allurl = null;
-		int searchnum = 10;
+		//由于该网站打开网页速度过慢，为保证搜索速度，因此搜索结果限制在15条
+		int searchnum = 15;
 		try {
 			allurl = "https://www.bookbao8.com/Search/q_" + URLEncoder.encode(key, "utf-8");
 		} catch (UnsupportedEncodingException e) {
