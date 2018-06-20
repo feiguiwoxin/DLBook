@@ -13,9 +13,11 @@ public class config {
 	private String username = null;
 	private String password = null;
 	private String database = null;
+	private String ip = null;
+	private String port = null;
 	private int database_state = 0;
 	private boolean can_delete = false;
-	private String dburl = "jdbc:mysql://127.0.0.1:3306/";
+	private String dburl = null;
 	private LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
 	private int framew = 0;
 	private int frameh = 0;
@@ -37,7 +39,10 @@ public class config {
 			username = pro.getProperty("username");
 			password = pro.getProperty("password");
 			database = pro.getProperty("database");
+			ip = pro.getProperty("server_ip","127.0.0.1");
+			port = pro.getProperty("port", "3306");
 			database_state = Integer.parseInt(pro.getProperty("database_state", "0"));
+			dburl = "jdbc:mysql://"+ip+":"+port+"/";
 			
 			framew = Integer.parseInt(pro.getProperty("width", "480"));
 			frameh = Integer.parseInt(pro.getProperty("height", "600"));

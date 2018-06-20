@@ -3,14 +3,12 @@ package dao;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 
 import Config.OrderProperty;
@@ -54,6 +52,7 @@ public class DbControl {
 						"  `websitename` varchar(60) NOT NULL," + 
 						"  `websiteurl` varchar(128) NOT NULL," + 
 						"  PRIMARY KEY (`bookid`)" + 
+						"  UNIQUE KEY (`bookname`, `author`, `websitename`)" + 
 						") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
 				cs.addBatch("CREATE TABLE  IF NOT EXISTS `chapters` (" + 
 						"  `chaptername` varchar(128) DEFAULT NULL," + 
@@ -63,39 +62,6 @@ public class DbControl {
 						"  PRIMARY KEY (`bookid`,`chapterid`)," + 
 						"  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`bookid`) REFERENCES `books` (`bookid`)" + 
 						") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-				cs.addBatch("DROP PROCEDURE IF EXISTS insert_bookinfo;");
-				cs.addBatch("DROP PROCEDURE IF EXISTS query_bookinfo;");
-				cs.addBatch("CREATE PROCEDURE `insert_bookinfo`(IN `bookname` varchar(60),IN `author` varchar(60),IN `lastchapter` varchar(128),IN `isfinal` tinyint,IN `websitename` varchar(60),IN `websiteurl` varchar(128),OUT `bookid` int,OUT `chapterid` int)" + 
-						"BEGIN" + 
-						"  DECLARE num int DEFAULT -1;" + 
-						"  DECLARE finalchapter VARCHAR(60);" + 
-						"  DECLARE weburl VARCHAR(128);" + 
-						"  DECLARE finalflag TINYINT;" + 
-						"  SELECT books.bookid,books.lastchapter,books.websiteurl,books.isfinal" + 
-						"  into num,finalchapter,weburl,isfinal FROM books" + 
-						"  where books.bookname=bookname and books.author=author and books.websitename=websitename;" + 
-						"  IF (num>0) THEN" + 
-						"    SET bookid = num;" + 
-						"    SELECT MAX(chapters.chapterid) into chapterid FROM chapters where chapters.bookid=num;" + 
-						"    IF (finalchapter != lastchapter OR weburl != websiteurl  OR finalflag != isfinal) THEN" + 
-						"      UPDATE books SET books.lastchapter=lastchapter,books.isfinal=isfinal,books.websiteurl=websiteurl WHERE books.bookid = bookid;  \r\n" + 
-						"    END IF;" + 
-						"  ELSE" + 
-						"    INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl)" + 
-						"    VALUES(author,bookname,isfinal,lastchapter,websitename,websiteurl);" + 
-						"    SELECT books.bookid into bookid FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;     set chapterid =0;" + 
-						"  END IF;" + 
-						"END;");
-				cs.addBatch("CREATE PROCEDURE `query_bookinfo` (IN `bookname` varchar(60),IN `author` varchar(60),IN `websitename` varchar(60),OUT `id` int)" + 
-						"BEGIN" + 
-						"  DECLARE num int DEFAULT -1;" + 
-						"  SELECT books.bookid into num FROM books where books.bookname=bookname and books.author=author and books.websitename=websitename;" + 
-						"  IF (num>0) THEN" + 
-						"    SELECT MAX(chapters.chapterid) into id FROM chapters where chapters.bookid=num;" + 
-						"  ELSE" + 
-						"    SET id = 0;" + 
-						"  END IF;" + 
-						"END;");
 				cs.executeBatch();
 				con.commit();
 				config.setDatabase_state(1);
@@ -177,29 +143,70 @@ public class DbControl {
 	}
 	
 	//用于更新书籍，如果书籍不存在则存储并缓存所有章节。如果已有部分章节，则只缓存新增章节
-	public void AddBook(BookBasicInfo bookinfo, ArrayList<Chapter> chapters)
+	public void AddBook(BookBasicInfo bookinfo, ArrayList<Chapter> chaptersindb, ArrayList<Chapter> chapters)
 	{
 		if (config.getDatabase_state() != 1) return;
-		CallableStatement cs = null;
 		PreparedStatement ps = null;
+		int bookid,chapterid;
 		
 		try {
 			this.OpenConnection();
-			cs = con.prepareCall("call insert_bookinfo(?,?,?,?,?,?,?,?)");
-			cs.setString(1, bookinfo.getBookName());
-			cs.setString(2, bookinfo.getAuthor());
-			cs.setString(3, bookinfo.getLastChapter());
-			cs.setInt(4, bookinfo.isIsfinal()?1:0);
-			cs.setString(5, bookinfo.getWebsite());
-			cs.setString(6, bookinfo.getBookUrl());
-			cs.registerOutParameter(7, Types.INTEGER);
-			cs.registerOutParameter(8, Types.INTEGER);
-			cs.execute();
-			int bookid = cs.getInt(7);
-			int chapterid = cs.getInt(8);
 			
 			con.setAutoCommit(false);
+			//用于插入或更新书籍信息
+			ps = con.prepareStatement("INSERT INTO books(books.author,books.bookname,books.isfinal,books.lastchapter,books.websitename,books.websiteurl) "+
+										"values(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE books.lastchapter=?,books.isfinal=?,books.websiteurl=?;");
+			ps.setString(1, bookinfo.getAuthor());
+			ps.setString(2, bookinfo.getBookName());
+			ps.setInt(3, bookinfo.isIsfinal()?1:0);
+			ps.setString(4, bookinfo.getLastChapter());		
+			ps.setString(5, bookinfo.getWebsite());
+			ps.setString(6, bookinfo.getBookUrl());
+			ps.setString(7, bookinfo.getLastChapter());
+			ps.setInt(8, bookinfo.isIsfinal()?1:0);
+			ps.setString(9, bookinfo.getBookUrl());
+			ps.executeUpdate();
+			ps.close();
+			//用于查询bookid和chapterid
+			ps = con.prepareStatement("select bookid from books where author=? and bookname=? and websitename=?");
+			ps.setString(1, bookinfo.getAuthor());
+			ps.setString(2, bookinfo.getBookName());
+			ps.setString(3, bookinfo.getWebsite());
+			ResultSet rs = ps.executeQuery();
+			rs.last();
+			if(rs.getRow()<1)
+			{
+				return;
+			}
+			bookid = rs.getInt(1);
+			ps.close();
+			ps = con.prepareStatement("select max(chapterid) from chapters where bookid=?");
+			ps.setInt(1, bookid);
+			rs = ps.executeQuery();
+			rs.last();
+			if(rs.getRow() < 1)
+			{
+				chapterid = 0;
+			}
+			else
+			{
+				chapterid = rs.getInt(1);
+			}
+			ps.close();
+			//插入数据
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
+			if(chapterid < chaptersindb.get(chaptersindb.size() - 1).getId())
+			{
+				for(Chapter chapter : chaptersindb)
+				{
+					if(chapter.getId() <= chapterid) continue;
+					ps.setString(1, chapter.getTitle());
+					ps.setString(2, chapter.getText());
+					ps.setInt(3, bookid);
+					ps.setInt(4, chapter.getId());
+					ps.executeUpdate();
+				}
+			}			
 			for(Chapter chapter : chapters)
 			{
 				if(chapter.getId() <= chapterid) continue;
@@ -219,7 +226,6 @@ public class DbControl {
 		finally
 		{
 			try {
-				if (cs != null) cs.close();
 				if (ps != null) ps.close();
 				CloseConnection();
 			} catch (SQLException e) {
@@ -230,69 +236,32 @@ public class DbControl {
 		}
 	}
 	
-	//查询书籍的最新章节信息，如果没有书籍，则返回-1或0
-	public int queryBookInfo(BookBasicInfo bookinfo)
+	//获取当前缓存的章节内容,返回最大章节ID，如果没有此书，则返回-1
+	public int getbookchapters(BookBasicInfo bookinfo,ArrayList<Chapter> chaptersindb)
 	{
-		if (config.getDatabase_state()  != 1) return -1;
-		CallableStatement cs = null;
-		int id = 0;
-		
-		try {
-			this.OpenConnection();
-			cs = con.prepareCall("call query_bookinfo(?,?,?,?)");
-			cs.setString(1, bookinfo.getBookName());
-			cs.setString(2, bookinfo.getAuthor());
-			cs.setString(3, bookinfo.getWebsite());
-			cs.registerOutParameter(4, Types.INTEGER);
-			cs.execute();
-			id = cs.getInt(4);
-			return id;
-		} catch (SQLException e) {
-			System.out.println("操作数据库失败(queryBookInfo):"+e.getMessage());
-			e.printStackTrace();
-			return -1;
-		}
-		finally
-		{
-			try {
-				if (cs != null) cs.close();
-				CloseConnection();
-			} catch (SQLException e) {
-				System.out.println("操作数据库失败，关闭资源失败(queryBookInfo)"+e.getMessage());
-				e.printStackTrace();
-				return -1;
-			}		
-		}
-	}
-	
-	//获取当前缓存的章节内容
-	public ArrayList<Chapter> getbookchapters(BookBasicInfo bookinfo)
-	{
+		int chapterid = -1;
 		PreparedStatement ps = null;
-		ArrayList<Chapter> chapters = new ArrayList<Chapter>();
-		if (config.getDatabase_state()  != 1) return chapters;
+		if (config.getDatabase_state()  != 1) return -1;
 		try {
 			this.OpenConnection();
-			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=?;");
+			
+			ps = con.prepareStatement("select chaptername,html from chapters where bookid=(select bookid from books where bookname=? and author=? and websitename=? limit 1) order by chapterid;");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
 			ps.setString(3, bookinfo.getWebsite());
-			ResultSet rs = ps.executeQuery();
-			rs.last();
-			int bookid = rs.getInt(1);
-			ps.close();
-			
-			ps = con.prepareStatement("select chaptername,html from chapters where bookid=? order by chapterid;");
-			ps.setInt(1, bookid);
-			rs = ps.executeQuery();
+			ResultSet rs= ps.executeQuery();
 			while(rs.next())
 			{
-				chapters.add(new Chapter(rs.getString(1), rs.getString(2)));
+				chaptersindb.add(new Chapter(rs.getString(1), rs.getString(2)));
+			}
+			if(chaptersindb.size() > 0)
+			{
+				chapterid = chaptersindb.get(chaptersindb.size() - 1).getId();
 			}
 		} catch (SQLException e) {
 			System.out.println("操作数据库失败(getbookchapters):"+e.getMessage());
 			e.printStackTrace();
-			return null;
+			return chapterid;
 		}
 		finally
 		{
@@ -302,11 +271,11 @@ public class DbControl {
 			} catch (SQLException e) {
 				System.out.println("操作数据库失败，关闭资源失败(getbookchapters):"+e.getMessage());
 				e.printStackTrace();
-				return null;
+				return chapterid;
 			}		
 		}
 		
-		return chapters;
+		return chapterid;
 	}
 	
 	public ArrayList<BookBasicInfo> queryallbooks()
@@ -349,26 +318,31 @@ public class DbControl {
 	
 	public boolean DeleteBook(BookBasicInfo bookinfo)
 	{
-		int bookid = -1;
 		PreparedStatement ps = null;
+		int bookid;
 		try {
 			OpenConnection();
 			con.setAutoCommit(false);
-			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=?;");
+			//先锁住主键来防止新增书籍与删除书籍形成的死锁
+			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=? for update");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
 			ps.setString(3, bookinfo.getWebsite());
 			ResultSet rs = ps.executeQuery();
 			rs.last();
-			if(rs.getRow() == 0) return false;
+			if(rs.getRow() < 1)
+			{
+				pc.setStateMsg("删除书籍成功(*)", true);
+				return true;
+			}
 			bookid = rs.getInt(1);
 			ps.close();
-			
+			//删除书籍
 			ps = con.prepareStatement("delete from chapters where bookid=?;");
 			ps.setInt(1, bookid);
 			ps.executeUpdate();
 			ps.close();
-			ps = con.prepareStatement("delete from books where bookid=?");
+			ps = con.prepareStatement("delete from books where bookid=?;");
 			ps.setInt(1, bookid);
 			ps.executeUpdate();
 			ps.close();

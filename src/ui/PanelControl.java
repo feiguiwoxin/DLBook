@@ -149,6 +149,10 @@ public class PanelControl extends JPanel{
 			booklists.remove(selection_pos);
 			flashtablelist();
 		}
+		else
+		{
+			buttonlistbook.doClick();
+		}
 	}
 	
 	public void doSearch()

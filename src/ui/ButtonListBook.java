@@ -9,8 +9,8 @@ import dao.DbControl;
 
 import static Config.config.*;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
@@ -18,10 +18,10 @@ import java.util.ArrayList;
 public class ButtonListBook extends JButton{
 	private PanelControl pc = null; 
 	
-	private class ClickListBook extends MouseAdapter
+	private class ClickListBook implements ActionListener
 	{
 		@Override
-		public void mouseClicked(MouseEvent e) 
+		public void actionPerformed(ActionEvent e)
 		{
 			if(!isEnabled() || config.getDatabase_state() != 1)
 			{
@@ -82,6 +82,6 @@ public class ButtonListBook extends JButton{
 		this.pc = pc;
 		setBounds(config.getFramew() - 300 - 25, 5, 75, 25);
 		setText("缓存");
-		addMouseListener(new ClickListBook());
+		addActionListener(new ClickListBook());
 	}
 }

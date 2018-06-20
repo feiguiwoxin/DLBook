@@ -33,6 +33,14 @@ PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合
 		<td>数据库名</td>
 	</tr>
 	<tr>
+		<td>server_ip</td>
+		<td>数据库ip，本机默认127.0.0.1</td>
+	</tr>
+	<tr>
+		<td>port</td>
+		<td>数据库端口，默认3306</td>
+	</tr>
+	<tr>
 		<td>database_state</td>
 		<td>0:需要重新配置数据库 <br>1:不需要重新配置数据库</td>
 	</tr>

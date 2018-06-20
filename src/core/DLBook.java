@@ -196,29 +196,20 @@ public abstract class DLBook {
 	 * */
 	public void SaveIntoFile(BookBasicInfo bookinfo)
 	{
-		ArrayList<Chapter> chaptersindb = null;
+		ArrayList<Chapter> chaptersindb = new ArrayList<Chapter>();
 		String filename = "./" + bookinfo.getBookName() + " " + bookinfo.getAuthor() + ".txt";
 		BufferedWriter bw = null;
 		int failnum = 0;
 		
 		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));
 		pc.setStateMsg("正在从数据库中获取已存储的章节",true);
-		int chapterid = DbControl.dbcontrol.queryBookInfo(bookinfo);
+		int chapterid = DbControl.dbcontrol.getbookchapters(bookinfo, chaptersindb);
 		if(chapterid > 0)
 		{
-			chaptersindb = DbControl.dbcontrol.getbookchapters(bookinfo);
-			if (chaptersindb == null)
-			{
-				pc.setStateMsg("数据库获取数据失败，开始从网络下载",true);
-				chapterid = -1;
-			}
-			else
-			{
-				pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()),true);
-			}
+			pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()),true);
 		}		
 		if(chapters == null) failnum = DLChapters(bookinfo, chapterid);
-		if(chapterid != -1) DbControl.dbcontrol.AddBook(bookinfo, chapters);		
+		DbControl.dbcontrol.AddBook(bookinfo, chaptersindb, chapters);		
 
 		pc.setStateMsg("将数据写入txt文本中",true);
 		try {
