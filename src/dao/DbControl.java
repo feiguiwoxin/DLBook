@@ -51,7 +51,7 @@ public class DbControl {
 						"  `updatetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," + 
 						"  `websitename` varchar(60) NOT NULL," + 
 						"  `websiteurl` varchar(128) NOT NULL," + 
-						"  PRIMARY KEY (`bookid`)" + 
+						"  PRIMARY KEY (`bookid`)," + 
 						"  UNIQUE KEY (`bookname`, `author`, `websitename`)" + 
 						") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
 				cs.addBatch("CREATE TABLE  IF NOT EXISTS `chapters` (" + 
@@ -195,18 +195,22 @@ public class DbControl {
 			ps.close();
 			//插入数据
 			ps = con.prepareStatement("insert into chapters values(?,?,?,?)");
-			if(chapterid < chaptersindb.get(chaptersindb.size() - 1).getId())
+			if(chaptersindb.size() > 0)
 			{
-				for(Chapter chapter : chaptersindb)
+				if(chapterid < chaptersindb.get(chaptersindb.size() - 1).getId())
 				{
-					if(chapter.getId() <= chapterid) continue;
-					ps.setString(1, chapter.getTitle());
-					ps.setString(2, chapter.getText());
-					ps.setInt(3, bookid);
-					ps.setInt(4, chapter.getId());
-					ps.executeUpdate();
+					for(Chapter chapter : chaptersindb)
+					{
+						if(chapter.getId() <= chapterid) continue;
+						ps.setString(1, chapter.getTitle());
+						ps.setString(2, chapter.getText());
+						ps.setInt(3, bookid);
+						ps.setInt(4, chapter.getId());
+						ps.executeUpdate();
+					}
 				}
-			}			
+			}
+						
 			for(Chapter chapter : chapters)
 			{
 				if(chapter.getId() <= chapterid) continue;
@@ -245,18 +249,20 @@ public class DbControl {
 		try {
 			this.OpenConnection();
 			
-			ps = con.prepareStatement("select chaptername,html from chapters where bookid=(select bookid from books where bookname=? and author=? and websitename=? limit 1) order by chapterid;");
+			ps = con.prepareStatement("select chapterid,chaptername,html from chapters where bookid=(select bookid from books where bookname=? and author=? and websitename=? limit 1) order by chapterid;");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
 			ps.setString(3, bookinfo.getWebsite());
 			ResultSet rs= ps.executeQuery();
 			while(rs.next())
 			{
-				chaptersindb.add(new Chapter(rs.getString(1), rs.getString(2)));
-			}
-			if(chaptersindb.size() > 0)
-			{
-				chapterid = chaptersindb.get(chaptersindb.size() - 1).getId();
+				Chapter chapter = new Chapter(rs.getString(2), rs.getString(3));
+				chapter.setId(rs.getInt(1));
+				chaptersindb.add(chapter);
+				if(rs.isLast())
+				{
+					chapterid = rs.getInt(1);
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println("操作数据库失败(getbookchapters):"+e.getMessage());
