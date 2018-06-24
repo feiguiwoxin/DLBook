@@ -90,8 +90,13 @@ protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo>
 # 配置mysql数据库
 
 如果要实现将数据入数据库的功能，要对数据库做一些配置：  
-1. 下载并安装mysql数据库，启动mysql数据库 ，将mysql数据库字符集设置为utf-8编码，确保mysql中包含一个名为mysql的数据库（为mysql自带默认数据库）；
-2. 在config.properity配置mysql数据库帐号，密码，数据库名，服务器IP，服务器端口，并确保database_state设置为0。  
+1.下载并安装mysql数据库，启动mysql数据库 ，将mysql数据库字符集设置为utf-8编码，确保mysql中包含一个名为mysql的数据库（为mysql自带默认数据库）。
+
+```
+友情提示，要修改默认字符串，需要在C:\Program Files\MySQL\MySQL Server xx内的my.ini中修改，而不是网上很多教程中的C:\ProgramData\MySQL\MySQL Server xx内修改; 
+```
+
+2.在config.properity配置mysql数据库帐号，密码，数据库名，服务器IP，服务器端口，并确保database_state设置为0。  
 PS：如果配置的为远程mysql服务器，请确保远程服务器以下设置OK  
 1）防火墙中允许mysqld进程或者关闭防火墙  
 2）相关用户在user表中的host为%。 
@@ -102,4 +107,12 @@ select host from mysql.user where user="root"
 如果上述查询结果为localhost，执行以下语句修改
 update mysql.user set host="%" where user="root"
 然后重启mysql服务
+```
+
+3.如果配置后发生如下类似的错误The server time zone value '�й���׼ʱ��' is unrecognized or represents more than one time zone，可以按如下设置
+
+```
+show variables like "%time_zone%";
+如果结果为SYSTEM，执行如下命令
+set global time_zone='+8:00';（和地区有关，总之和UTC时间对齐）
 ```

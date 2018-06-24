@@ -69,6 +69,7 @@ public class DbControl {
 				WriteStateInfoFile();
 			} catch (SQLException e) {
 				config.setDatabase_state(2);
+				System.out.println(e.getMessage());
 				pc.setStateMsg("初始化数据库失败,如需使用数据库，在确认配置后重新打开本程序。",true);
 				e.printStackTrace();
 				return;
