@@ -39,14 +39,14 @@ public class config {
 		try {
 			fr = new FileReader("./config.properity");
 			pro.load(fr);
-			username = pro.getProperty("username");
-			password = pro.getProperty("password");
-			database = pro.getProperty("database");
-			ip = pro.getProperty("server_ip","127.0.0.1");
+			username = pro.getProperty("username", "root");
+			password = pro.getProperty("password", "mysql");
+			database = pro.getProperty("database", "dlbook");
+			ip = pro.getProperty("server_ip", "127.0.0.1");
 			port = pro.getProperty("port", "3306");
 			database_state = Integer.parseInt(pro.getProperty("database_state", "0"));
 			dburl = "jdbc:mysql://"+ip+":"+port+"/";
-			Collections.addAll(search_switch, pro.getProperty("search_switch").split(",", websites.size()));
+			Collections.addAll(search_switch, pro.getProperty("search_switch", "1").split(",", websites.size()));
 			for(int i = 0;i < websites.size();i++)
 			{
 				if(i < search_switch.size())
