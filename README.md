@@ -44,6 +44,10 @@ PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合
 		<td>database_state</td>
 		<td>0:需要重新配置数据库 <br>1:不需要重新配置数据库</td>
 	</tr>
+	<tr>
+		<td>search_switch</td>
+		<td>控制搜索范围，以","分割，1表示搜索改网站，0表示不搜索<br>顺序与config.java中的websites容器顺序一致</td>
+	</tr>
 </table>
 
 

@@ -6,3 +6,4 @@ database=book
 server_ip=127.0.0.1
 port=3306
 database_state=0
+search_switch=0,1,1,1

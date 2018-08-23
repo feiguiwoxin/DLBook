@@ -3,6 +3,8 @@ package Config;
 import java.awt.Toolkit;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 
 import javax.swing.JOptionPane;
@@ -16,6 +18,7 @@ public class config {
 	private String ip = null;
 	private String port = null;
 	private int database_state = 0;
+	private ArrayList<String> search_switch = new ArrayList<String>();
 	private boolean can_delete = false;
 	private String dburl = null;
 	private LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
@@ -43,6 +46,22 @@ public class config {
 			port = pro.getProperty("port", "3306");
 			database_state = Integer.parseInt(pro.getProperty("database_state", "0"));
 			dburl = "jdbc:mysql://"+ip+":"+port+"/";
+			Collections.addAll(search_switch, pro.getProperty("search_switch").split(",", websites.size()));
+			for(int i = 0;i < websites.size();i++)
+			{
+				if(i < search_switch.size())
+				{
+					String tmp_e = search_switch.get(i);
+					if(!tmp_e.equals("1") && !tmp_e.equals("0"))
+					{
+						search_switch.set(i, "1");
+					}
+				}
+				else
+				{
+					search_switch.add("1");
+				}
+			}
 			
 			framew = Integer.parseInt(pro.getProperty("width", "480"));
 			frameh = Integer.parseInt(pro.getProperty("height", "600"));
@@ -117,5 +136,9 @@ public class config {
 
 	public void setCan_delete(boolean can_delete) {
 		this.can_delete = can_delete;
+	}
+
+	public ArrayList<String> getSearch_switch() {
+		return search_switch;
 	}
 }

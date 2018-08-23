@@ -86,7 +86,7 @@ public abstract class DLBook {
 		if(Urladdress == null || charset == null) return null;
 		URL url;
 		StringBuffer result = new StringBuffer();
-		int trytime = 5;
+		int trytime = 3;
 
 		while(trytime > 0)
 		{
@@ -97,8 +97,8 @@ public abstract class DLBook {
 				con.setRequestProperty("Connection", "keep-alive");
 				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
 				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-				con.setConnectTimeout(4 * 1000);
-				con.setReadTimeout(4 * 1000);
+				con.setConnectTimeout(10 * 1000);
+				con.setReadTimeout(10 * 1000);
 				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
 				String line = null;
 				while((line = br.readLine()) != null)

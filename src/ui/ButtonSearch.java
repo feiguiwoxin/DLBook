@@ -33,8 +33,12 @@ public class ButtonSearch extends JButton{
 		public void run() {
 			ArrayList<Future<DLBook>> futures = new ArrayList<Future<DLBook>>();
 			ExecutorService pool = Executors.newCachedThreadPool();
+			int index = 0;
 			for(String website : config.getWebsites().keySet())
 			{
+				String website_switch = config.getSearch_switch().get(index);
+				index ++;
+				if(!website_switch.equals("1")) continue;
 				futures.add(pool.submit(new searchbook(website, key)));
 			}
 			pool.shutdown();

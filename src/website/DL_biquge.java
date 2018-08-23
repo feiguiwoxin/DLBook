@@ -26,8 +26,7 @@ public class DL_biquge extends DLBook{
 		ArrayList<BookBasicInfo> allbookinfo = new ArrayList<BookBasicInfo>();
 		String SearchUrl = null;
 		try {
-			SearchUrl = "https://www.qu.la/SearchBook.php?" + 
-								"t=" + new Date().getTime() + "&keyword=" + URLEncoder.encode(key, "utf-8");
+			SearchUrl = "https://sou.xanbhx.com/search?siteid=qula&q=" + URLEncoder.encode(key, "utf-8");
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("解码失败(utf-8,biquge):" + key);
 			e.printStackTrace();
@@ -47,7 +46,7 @@ public class DL_biquge extends DLBook{
 			BookBasicInfo bookinfo = new BookBasicInfo();
 			boolean finalflag = false;
 			bookinfo.setBookName(bookname.get(i).text());
-			bookinfo.setBookUrl("https://www.qu.la" + bookname.get(i).getElementsByTag("a").attr("href"));
+			bookinfo.setBookUrl(bookname.get(i).getElementsByTag("a").attr("href"));
 			bookinfo.setAuthor(author.get(i).text());
 			if(isfinal.get(i).text().equals("完成")) finalflag = true;
 			bookinfo.setIsfinal(finalflag);
@@ -70,11 +69,21 @@ public class DL_biquge extends DLBook{
 		Elements Catalogs = doc.getElementsByTag("dl").first().getAllElements();
 		
 		ArrayList<String> results = new ArrayList<String>();
-		int dtnum = 0;
+		boolean dtuse= false;
 		for(Element catalog : Catalogs)
 		{
-			if(catalog.tagName().equals("dt")) dtnum ++;
-			if(dtnum >1 && catalog.tagName().equals("a"))
+			if(catalog.tagName().equals("dt"))
+			{
+				if(catalog.text().contains("已启用缓存技术，最新章节可能会延时显示"))
+				{
+					dtuse = false;
+				}
+				else
+				{
+					dtuse = true;
+				}
+			}
+			if(dtuse && catalog.tagName().equals("a"))
 			{
 				results.add("https://www.qu.la" + catalog.attr("href"));
 			}		
