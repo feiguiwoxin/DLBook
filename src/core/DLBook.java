@@ -190,9 +190,9 @@ public abstract class DLBook {
 		this.pc = pc;
 	}
 	
-	/*如果chapterid=-1，表示数据库出现问题，则直接从网络下载全部章节并保存
-	 * 如果chapterid=-0，表示数据库OK但没有数据，则不从数据库获取数据，但需要将数据同时保存在数据库和txt
-	 * 如果chapterid>0，表示数据库汇总有数据，需要从数据库获取数据，同时下载剩余数据更新到数据库并保存到txt
+	/*1、如果chapterid=-1，表示数据库中找不到该书；
+	 * 2、如果chapterid>=0，表示数据库中有数据。
+	 * 将会从数据库中获取已有数据，从网络中更新新的章节，然后将新的章节写入数据库。最后汇总数据库数据和网络下载数据写入txt中；
 	 * */
 	public void SaveIntoFile(BookBasicInfo bookinfo)
 	{
