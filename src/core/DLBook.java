@@ -6,10 +6,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -80,26 +83,28 @@ public abstract class DLBook {
 						new Date(), bookurls.size(), successnum, bookurls.size() - successnum, this.websitename), true);
 	}
 	
-	//根据网址和编码集获取网页内容
+	//根据网址和编码集获取网页内容，get方式获取
 	protected String getHtmlInfo(String Urladdress, String charset)
 	{
 		if(Urladdress == null || charset == null) return null;
 		URL url;
 		StringBuffer result = new StringBuffer();
 		int trytime = 3;
+		BufferedReader br = null;
+		HttpURLConnection con = null;
 
 		while(trytime > 0)
 		{
 			try {
 				url = new URL(Urladdress);
-				HttpURLConnection con = (HttpURLConnection)url.openConnection();
+				con = (HttpURLConnection)url.openConnection();
 				HttpURLConnection.setFollowRedirects(true);
 				con.setRequestProperty("Connection", "keep-alive");
 				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
 				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 				con.setConnectTimeout(10 * 1000);
 				con.setReadTimeout(10 * 1000);
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
+				br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
 				String line = null;
 				while((line = br.readLine()) != null)
 				{
@@ -110,7 +115,77 @@ public abstract class DLBook {
 				System.out.println(Urladdress + "连接超时，重试" + trytime);
 				trytime--;			
 			}
+			finally
+			{
+				
+				try {
+					if (br != null) br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+		return null;
+	}
+	
+	//根据网址和编码集获取网页内容，post方式获取
+	protected String postHtmlInfo(String Urladdress, LinkedHashMap<String,String> values, String inputcharset, String outputcharset)
+	{
+		if(Urladdress == null || inputcharset == null || outputcharset == null) return null;
+		URL url;
+		StringBuffer result = new StringBuffer();
+		int trytime = 3;
+		boolean frist = true;
+		PrintWriter pw = null;
+		BufferedReader br = null;
+		
+		while(trytime > 0)
+		{
+			try {
+				url = new URL(Urladdress);
+				HttpURLConnection con = (HttpURLConnection)url.openConnection();
+				HttpURLConnection.setFollowRedirects(true);		
+				con.setDoOutput(true);//设置打开输入流，这是post必须要使用的
+				con.setRequestProperty("Connection", "keep-alive");
+				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
+				con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+				con.setConnectTimeout(10 * 1000);
+				con.setReadTimeout(10 * 1000);
+				pw = new PrintWriter(con.getOutputStream());
+				frist = true;
+				
+				//填入需要post的表单数据
+				for(String key:values.keySet())
+				{
+					if(!frist) pw.print("&");
+					pw.print(key+"="+URLEncoder.encode(values.get(key), outputcharset));
+					frist = false;
+				}
+				pw.flush();
+				
+				//获取返回的网页信息
+				br = new BufferedReader(new InputStreamReader(con.getInputStream(), inputcharset));
+				String line = null;
+				while((line = br.readLine()) != null)
+				{
+					result.append(line+"\r\n");
+				}
+				return result.toString();
+			} catch (Exception e) {
+				System.out.println(Urladdress + "连接超时，重试" + trytime);
+				trytime--;			
+			}
+			finally
+			{				
+				try {
+					if(pw != null) pw.close();
+					if(br != null) br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		return null;
 	}
 	

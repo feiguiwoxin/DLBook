@@ -56,10 +56,13 @@ PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合
 ```
 //根据搜索关键字返回一个搜索结果列表
 protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
+
 //根据小说的网址返回小说的目录信息
 protected abstract ArrayList<String> getCatalog(String Url);
+
 //根据小说章节地址返回小说的章节内容
 protected abstract Chapter getChapters(String Url);
+
 //返回该网站的网站名，注意，继承的子类之间，网站名不得重复（数据库依靠网站名来区分不同的网站）
 protected abstract String setWebsiteName();
 ```
@@ -82,8 +85,12 @@ PS:使用System.out.println()将直接输出到DLBookLog运行日志中。
 ```
 //说明，以下这些方法并不强制需要实现或调用，而是公用方法来增加爬取效率
 
-//根据网址和编码字符集返回网页内容，会自动重试5次，如果仍然失败，则返回null
+//根据网址和编码集获取网页内容，get方式获取
 protected String getHtmlInfo(String Urladdress, String charset);
+
+//根据网址和编码集获取网页内容，post方式获取,要求输入网址，表单集，填写表单的字符编码和最终获取网页的字符编码
+protected String postHtmlInfo(String Urladdress, LinkedHashMap<String,String> values, String inputcharset, String outputcharset)
+
 /*一些网站返回的搜索结果中只包含小说的欢迎页面地址，需要进一步进入这些地址才能怕取到我们想要的内容。
 这两个方法用于多线程爬取这些页面，加快搜索速度*/
 //需要在子类中覆写，根据传入的网页内容返回书籍信息

@@ -123,18 +123,4 @@ public class DL_biquge extends DLBook{
 	protected String setWebsiteName() {
 		return "笔趣阁";
 	}
-	
-//	public static void main(String[] args)
-//	{
-//		PanelControl pc = new PanelControl();
-//		DL_biquge biquge = new DL_biquge(pc, 10);
-//		BookBasicInfo bookinfo = new BookBasicInfo();
-//		bookinfo.setAuthor("耳根");
-//		bookinfo.setBookName("一念永恒");
-//		bookinfo.setBookUrl("https://www.qu.la/book/16431/");
-//		bookinfo.setIsfinal(true);
-//		bookinfo.setLastChapter("新书《三寸人间》发布!!!求收藏!!");
-//		bookinfo.setWebsite(biquge.setWebsiteName());
-//		biquge.SaveIntoFile(bookinfo);
-//	}
 }

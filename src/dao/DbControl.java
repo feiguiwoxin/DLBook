@@ -1,7 +1,7 @@
 package dao;
 
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -92,13 +92,13 @@ public class DbControl {
 	private void WriteStateInfoFile()
 	{
 		OrderProperty pro = new OrderProperty();
-		FileReader fr = null;
-		FileWriter fw = null;
+		FileInputStream fr = null;
+		FileOutputStream fw = null;
 		try {
-			fr = new FileReader("./config.properity");
+			fr = new FileInputStream("./config.properity");
 			pro.load(fr);
 			fr.close();
-			fw = new FileWriter("./config.properity");
+			fw = new FileOutputStream("./config.properity");
 			pro.setProperty("database_state", "1");
 			pro.store(fw);
 		} catch (Exception e) {
@@ -330,7 +330,10 @@ public class DbControl {
 		try {
 			OpenConnection();
 			con.setAutoCommit(false);
-			//先锁住主键来防止新增书籍与删除书籍形成的死锁
+			/*先锁住主键来防止更新书籍与删除书籍形成的死锁。
+			更新书籍先更新的为目录，因此锁住目录。删除书籍先删除具体内容，因此锁住内容。
+			更新书籍的下一步要在内容中添加内容，但已经被锁。同样，删除书籍的下一步为删除目录，同样被锁住。
+			这里，删除时申请目录锁，如果已经被更新占用，则会等待更新完成再删除。如果删除过程中有更新需求，则需要等待删除完成才能释放锁资源给更新。*/
 			ps = con.prepareStatement("select bookid from books where bookname=? and author=? and websitename=? for update");
 			ps.setString(1, bookinfo.getBookName());
 			ps.setString(2, bookinfo.getAuthor());
@@ -339,7 +342,7 @@ public class DbControl {
 			rs.last();
 			if(rs.getRow() < 1)
 			{
-				pc.setStateMsg("删除书籍成功(*)", true);
+				pc.setStateMsg(String.format("*该书籍(%s-%s-%s)不存在，或被其他客户端删除。", bookinfo.getBookName(), bookinfo.getAuthor(), bookinfo.getWebsite()), true);
 				return true;
 			}
 			bookid = rs.getInt(1);
@@ -355,7 +358,7 @@ public class DbControl {
 			ps.close();
 			
 			con.commit();
-			pc.setStateMsg("删除书籍成功", true);
+			pc.setStateMsg(String.format("删除书籍成功(%s-%s-%s)", bookinfo.getBookName(), bookinfo.getAuthor(), bookinfo.getWebsite()), true);
 		} catch (SQLException e) {
 			pc.setStateMsg("数据库错误,删除书籍失败", true);
 			e.printStackTrace();

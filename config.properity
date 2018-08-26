@@ -6,4 +6,5 @@ database=book
 server_ip=127.0.0.1
 port=3306
 database_state=0
-search_switch=0,1,1,1
+#设置是否在该页面进行搜索。0表示不搜索，1表示搜索。当前依次表示79小说、笔趣阁、书包网，书书吧、混混小说
+search_switch=0,1,1,1,1

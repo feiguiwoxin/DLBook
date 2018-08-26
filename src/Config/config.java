@@ -1,7 +1,7 @@
 package Config;
 
 import java.awt.Toolkit;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,11 +33,12 @@ public class config {
 		websites.put("website.DL_biquge", 8);
 		websites.put("website.DL_bookbao8", 3);
 		websites.put("website.DL_shushu8", 8);
+		websites.put("website.DL_hunhun520", 8);
 		
 		OrderProperty pro = new OrderProperty();
-		FileReader fr = null;
+		FileInputStream fr = null;
 		try {
-			fr = new FileReader("./config.properity");
+			fr = new FileInputStream("./config.properity");
 			pro.load(fr);
 			username = pro.getProperty("username", "root");
 			password = pro.getProperty("password", "mysql");

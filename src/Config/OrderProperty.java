@@ -2,20 +2,26 @@ package Config;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.LinkedHashMap;
 
 @SuppressWarnings("serial")
 public class OrderProperty extends LinkedHashMap<String, String>{
 
-	public void load(FileReader fis) throws IOException
+	public void load(FileInputStream fis) throws IOException
 	{
 		String line = null;
-		BufferedReader br = new BufferedReader(fis);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf-8"));
 		while((line = br.readLine()) != null)
 		{
+			if(line.charAt(0) == '#')
+			{
+				put(line,null);
+			}
 			String[] values = line.split("=", 2);
 			if(values.length == 1) continue;
 			put(values[0], values[1]);
@@ -46,12 +52,19 @@ public class OrderProperty extends LinkedHashMap<String, String>{
 		this.replace(key, value);
 	}
 	
-	public void store(FileWriter fw) throws IOException
+	public void store(FileOutputStream fos) throws IOException
 	{
-		BufferedWriter bw = new BufferedWriter(fw);
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos, "utf-8"));
 		for(String key : this.keySet())
 		{
-			bw.write(key + "=" + this.get(key));
+			if(key.charAt(0) == '#')
+			{
+				bw.write(key);
+			}
+			else
+			{
+				bw.write(key + "=" + this.get(key));
+			}
 			bw.newLine();
 		}
 		bw.flush();
