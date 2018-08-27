@@ -15,7 +15,7 @@ public class ButtonDl extends JButton{
 	private class ClickDl extends MouseAdapter
 	{
 		@Override
-		public void mouseClicked(MouseEvent e) 
+		public void mousePressed(MouseEvent e) 
 		{
 			if (isEnabled() && pc.getselection_pos() >= 0)
 			{

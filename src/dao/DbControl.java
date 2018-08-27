@@ -1,8 +1,5 @@
 package dao;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -65,8 +62,8 @@ public class DbControl {
 				cs.executeBatch();
 				con.commit();
 				config.setDatabase_state(1);
+				OrderProperty.ModifyAndSave("database_state", "1");
 				pc.setStateMsg("数据库配置完成",true);
-				WriteStateInfoFile();
 			} catch (SQLException e) {
 				config.setDatabase_state(2);
 				System.out.println(e.getMessage());
@@ -87,35 +84,6 @@ public class DbControl {
 				}
 			}
 		}	
-	}
-	
-	private void WriteStateInfoFile()
-	{
-		OrderProperty pro = new OrderProperty();
-		FileInputStream fr = null;
-		FileOutputStream fw = null;
-		try {
-			fr = new FileInputStream("./config.properity");
-			pro.load(fr);
-			fr.close();
-			fw = new FileOutputStream("./config.properity");
-			pro.setProperty("database_state", "1");
-			pro.store(fw);
-		} catch (Exception e) {
-			System.out.println("写入database_state失败"+e.getMessage());
-			e.printStackTrace();
-			return;
-		}
-		finally 
-		{
-			try {
-				if(fw != null) fw.close();
-			} catch (IOException e) {
-				System.out.println("文件流关闭错误，配置文件可能被清空" + e.getMessage());
-				e.printStackTrace();
-				return;
-			}		
-		}
 	}
 	
 	private void OpenConnection() throws SQLException
@@ -342,7 +310,7 @@ public class DbControl {
 			rs.last();
 			if(rs.getRow() < 1)
 			{
-				pc.setStateMsg(String.format("*该书籍(%s-%s-%s)不存在，或被其他客户端删除。", bookinfo.getBookName(), bookinfo.getAuthor(), bookinfo.getWebsite()), true);
+				pc.setStateMsg(String.format("该书籍(%s-%s-%s)不存在，或被其他客户端删除。", bookinfo.getBookName(), bookinfo.getAuthor(), bookinfo.getWebsite()), true);
 				return true;
 			}
 			bookid = rs.getInt(1);

@@ -16,8 +16,8 @@ import ui.PanelControl;
 
 public class DL_79xs extends DLBook{
 
-	public DL_79xs(PanelControl pc,int poolsize) {
-		super(pc, poolsize);
+	public DL_79xs(PanelControl pc) {
+		super(pc);
 	}
 
 	@Override
@@ -108,10 +108,5 @@ public class DL_79xs extends DLBook{
 		bookinfo.setWebsite(websitename);
 		
 		return bookinfo;
-	}
-
-	@Override
-	protected String setWebsiteName() {
-		return "79小说";
 	}
 }

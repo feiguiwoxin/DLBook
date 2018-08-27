@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static Config.config.config;
 import dao.DbControl;
 import ui.PanelControl;
 
@@ -33,12 +34,10 @@ public abstract class DLBook {
 	 * getBookInfoByKey用于根据搜索关键字返回搜索结果
 	 * getCatalog用于根据getBookInfoByKey中的书籍的URL地址返回该书所有章节的URL地址
 	 * getChapters用于根据getCatalog中的章节URL地址返回章节名和内容
-	 * setWebsiteName用于设置网站名，子类间的网站名不得重复
 	 * */
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 	protected abstract ArrayList<String> getCatalog(String Url);
 	protected abstract Chapter getChapters(String Url);
-	protected abstract String setWebsiteName();
 	
 	/*部分网站在第一次搜索关键字返回的结果往往不能满足我们的需要，比如我们希望从搜索结果中
 	 * 获得一个能够读取到小说目录的url，但往往搜索结果中返回的是一个小说的欢迎页面，需要在欢迎
@@ -256,12 +255,20 @@ public abstract class DLBook {
 	}
 	
 	//在构造对象的同时直接生成搜索结果
-	public DLBook(PanelControl pc, int poolsize)
+	public DLBook(PanelControl pc)
 	{
+		if(config.getWebsites().get(this.getClass().getName()) != null)
+		{
+			poolsize = config.getWebsites().get(this.getClass().getName()).getPoolsize();
+			websitename = config.getWebsites().get(this.getClass().getName()).getWebsitename();
+		}
+		else
+		{
+			poolsize = 8;
+			websitename = this.getClass().getName();
+		}		
 		if(poolsize <= 0 || poolsize >= 16) poolsize = 8;
-		this.poolsize = poolsize;
-		this.websitename = setWebsiteName();
-		if(websitename == null) websitename = this.getClass().getName();
+		
 		this.pc = pc;
 	}
 	

@@ -33,12 +33,10 @@ public class ButtonSearch extends JButton{
 		public void run() {
 			ArrayList<Future<DLBook>> futures = new ArrayList<Future<DLBook>>();
 			ExecutorService pool = Executors.newCachedThreadPool();
-			int index = 0;
 			for(String website : config.getWebsites().keySet())
 			{
-				String website_switch = config.getSearch_switch().get(index);
-				index ++;
-				if(!website_switch.equals("1")) continue;
+				boolean website_switch = config.getWebsites().get(website).getWebswitch();
+				if(!website_switch) continue;
 				futures.add(pool.submit(new searchbook(website, key)));
 			}
 			pool.shutdown();
@@ -80,9 +78,8 @@ public class ButtonSearch extends JButton{
 			DLBook dlbook = null;
 			try {
 				Class<?> cls = Class.forName(website);
-				Constructor<?> con = cls.getConstructor(PanelControl.class, int.class);
-				int poolsize = config.getWebsites().get(website);
-				dlbook = (DLBook) con.newInstance(pc, poolsize);
+				Constructor<?> con = cls.getConstructor(PanelControl.class);
+				dlbook = (DLBook) con.newInstance(pc);
 				dlbook.StartSearch(key);
 			} catch (Exception e1) {
 				e1.printStackTrace();

@@ -69,4 +69,33 @@ public class OrderProperty extends LinkedHashMap<String, String>{
 		}
 		bw.flush();
 	}
+	
+	public static void ModifyAndSave(String key, String value)
+	{
+		OrderProperty pro = new OrderProperty();
+		FileInputStream fr = null;
+		FileOutputStream fw = null;
+		try {
+			fr = new FileInputStream("./config.properity");
+			pro.load(fr);
+			fr.close();
+			fw = new FileOutputStream("./config.properity");
+			pro.setProperty(key, value);
+			pro.store(fw);
+		} catch (Exception e) {
+			System.out.println("写入"+key+"失败"+e.getMessage());
+			e.printStackTrace();
+			return;
+		}
+		finally 
+		{
+			try {
+				if(fw != null) fw.close();
+			} catch (IOException e) {
+				System.out.println("文件流关闭错误，配置文件可能被清空" + e.getMessage());
+				e.printStackTrace();
+				return;
+			}		
+		}
+	}
 }

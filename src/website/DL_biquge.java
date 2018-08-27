@@ -17,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_biquge extends DLBook{
 
-	public DL_biquge(PanelControl pc,int poolsize) {
-		super(pc, poolsize);
+	public DL_biquge(PanelControl pc) {
+		super(pc);
 	}
 
 	@Override
@@ -117,10 +117,5 @@ public class DL_biquge extends DLBook{
 		if(text.length() == 0) return null;
 		text = text.replaceAll("<script>chaptererror\\(\\);</script>", "");
 		return new Chapter(title, text);
-	}
-	
-	@Override
-	protected String setWebsiteName() {
-		return "笔趣阁";
 	}
 }

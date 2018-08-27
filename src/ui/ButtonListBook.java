@@ -43,9 +43,8 @@ public class ButtonListBook extends JButton{
 			{
 				try {
 					Class<?> cls = Class.forName(website);
-					Constructor<?> con = cls.getConstructor(PanelControl.class, int.class);
-					int poolsize = config.getWebsites().get(website);
-					DLBook dlbook = (DLBook)con.newInstance(pc, poolsize);
+					Constructor<?> con = cls.getConstructor(PanelControl.class);
+					DLBook dlbook = (DLBook)con.newInstance(pc);
 					dlbooks.add(dlbook);
 				} catch (Exception e1) {
 					System.out.println("加载类失败(ClickListBook):" + website);

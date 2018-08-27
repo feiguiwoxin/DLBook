@@ -1,7 +1,10 @@
 package ui;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -45,6 +48,27 @@ public class PanelControl extends JPanel{
 		add(buttondl);
 		addTable();
 		add(textfieldstat);
+		
+		addMouseListener(new MouseAdapter()
+		{
+			public void mousePressed(MouseEvent e)
+			{
+				if(e.getX() >= config.getFramew()-40 && e.getX()<=config.getFramew()-40+30
+					&& e.getY() >= config.getFrameh()-38-30+5 && e.getY() <= config.getFrameh()-38-30+35)
+				{
+					PanelControl.this.setEnabled(false);
+					new DialogSetting();
+				}
+			}
+		});
+	}
+	
+	@Override
+	public void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+				
+		g.drawImage(config.getSettingIcon(), config.getFramew()-40, config.getFrameh()-38-30+5, 30, 30, null);
 	}
 	
 	private void addTable()

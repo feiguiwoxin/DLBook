@@ -16,8 +16,8 @@ import ui.PanelControl;
 
 public class DL_hunhun520 extends DLBook{
 
-	public DL_hunhun520(PanelControl pc, int poolsize) {
-		super(pc, poolsize);
+	public DL_hunhun520(PanelControl pc) {
+		super(pc);
 	}
 
 	@Override
@@ -90,10 +90,5 @@ public class DL_hunhun520 extends DLBook{
 		Chapter c = new Chapter(title, text);
 		
 		return c;
-	}
-
-	@Override
-	protected String setWebsiteName() {
-		return "混混小说";
 	}
 }

@@ -1,13 +1,15 @@
 package Config;
 
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+
+import ui.PanelControl;
 
 public class config {
 	public static final config config = new config();
@@ -18,22 +20,22 @@ public class config {
 	private String ip = null;
 	private String port = null;
 	private int database_state = 0;
-	private ArrayList<String> search_switch = new ArrayList<String>();
 	private boolean can_delete = false;
 	private String dburl = null;
-	private LinkedHashMap<String, Integer> websites = new LinkedHashMap<String, Integer>();
+	private LinkedHashMap<String, websiteinfo> websites = new LinkedHashMap<String, websiteinfo>();
 	private int framew = 0;
 	private int frameh = 0;
 	private int screenwidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 	private int screenwheight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+	private final Image setting_icon = new ImageIcon(PanelControl.class.getResource("/Image/setting.png")).getImage();
 	
 	private config()
 	{
-		websites.put("website.DL_79xs", 8);
-		websites.put("website.DL_biquge", 8);
-		websites.put("website.DL_bookbao8", 3);
-		websites.put("website.DL_shushu8", 8);
-		websites.put("website.DL_hunhun520", 8);
+		websites.put("website.DL_79xs", new websiteinfo(8, "79小说"));
+		websites.put("website.DL_biquge", new websiteinfo(8, "笔趣阁"));
+		websites.put("website.DL_bookbao8", new websiteinfo(3, "书包网"));
+		websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
+		websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
 		
 		OrderProperty pro = new OrderProperty();
 		FileInputStream fr = null;
@@ -47,21 +49,21 @@ public class config {
 			port = pro.getProperty("port", "3306");
 			database_state = Integer.parseInt(pro.getProperty("database_state", "0"));
 			dburl = "jdbc:mysql://"+ip+":"+port+"/";
-			Collections.addAll(search_switch, pro.getProperty("search_switch", "1").split(",", websites.size()));
-			for(int i = 0;i < websites.size();i++)
+			
+			int num = 0;
+			String[] switchs = pro.getProperty("search_switch", "1").split(",", websites.size());
+			for(String key : websites.keySet())
 			{
-				if(i < search_switch.size())
+				if(num < switchs.length)
 				{
-					String tmp_e = search_switch.get(i);
-					if(!tmp_e.equals("1") && !tmp_e.equals("0"))
-					{
-						search_switch.set(i, "1");
-					}
+					boolean tmpswitch = switchs[num].equals("0") ? false : true;
+					websites.get(key).setWebswitch(tmpswitch);
 				}
 				else
 				{
-					search_switch.add("1");
+					websites.get(key).setWebswitch(true);
 				}
+				num ++;
 			}
 			
 			framew = Integer.parseInt(pro.getProperty("width", "480"));
@@ -107,7 +109,7 @@ public class config {
 		return dburl;
 	}
 
-	public LinkedHashMap<String, Integer> getWebsites() {
+	public LinkedHashMap<String, websiteinfo> getWebsites() {
 		return websites;
 	}
 
@@ -139,7 +141,7 @@ public class config {
 		this.can_delete = can_delete;
 	}
 
-	public ArrayList<String> getSearch_switch() {
-		return search_switch;
+	public Image getSettingIcon() {
+		return setting_icon;
 	}
 }

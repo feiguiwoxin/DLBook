@@ -46,7 +46,7 @@ PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合
 	</tr>
 	<tr>
 		<td>search_switch</td>
-		<td>控制搜索范围，以","分割，1表示搜索改网站，0表示不搜索<br>顺序与config.java中的websites容器顺序一致</td>
+		<td>控制搜索范围，请在UI界面中设置</td>
 	</tr>
 </table>
 
@@ -62,9 +62,6 @@ protected abstract ArrayList<String> getCatalog(String Url);
 
 //根据小说章节地址返回小说的章节内容
 protected abstract Chapter getChapters(String Url);
-
-//返回该网站的网站名，注意，继承的子类之间，网站名不得重复（数据库依靠网站名来区分不同的网站）
-protected abstract String setWebsiteName();
 ```
 注意：  
 1. getBookInfoByKey返回的BookBasicInfo中的BookUrl将用于getCatalog的输入，getCatalog返回的Url用于getChapters的输入；
@@ -72,10 +69,11 @@ protected abstract String setWebsiteName();
 
 ## 在config类中增加以上新增的类路径  
 ```
-websites.put("website.DL_79xs", 8);
-websites.put("website.DL_biquge", 8);
-websites.put("website.DL_bookbao8", 2);
-websites.put("website.DL_shushu8", 8);
+websites.put("website.DL_79xs", new websiteinfo(8, "79小说"));
+websites.put("website.DL_biquge", new websiteinfo(8, "笔趣阁"));
+websites.put("website.DL_bookbao8", new websiteinfo(3, "书包网"));
+websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
+websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
 ```
 类似上面那样增加类路径和对该网站下载时使用的多线程数（不得超过16线程，不能低于1线程，否则会被强制为8线程）。  
 如果一些网站下载的时候出现一大片因为连接超时导致的下载失败，可以尝试降低线程数。  

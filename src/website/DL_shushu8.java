@@ -17,8 +17,8 @@ import ui.PanelControl;
 
 public class DL_shushu8 extends DLBook{
 
-	public DL_shushu8(PanelControl pc, int poolsize) {
-		super(pc, poolsize);
+	public DL_shushu8(PanelControl pc) {
+		super(pc);
 	}
 
 	@Override
@@ -100,10 +100,5 @@ public class DL_shushu8 extends DLBook{
 		bookinfo.setWebsite(websitename);
 		
 		return bookinfo;
-	}
-	
-	@Override
-	protected String setWebsiteName() {
-		return "书书吧";
 	}
 }

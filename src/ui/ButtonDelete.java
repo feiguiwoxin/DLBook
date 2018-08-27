@@ -14,7 +14,7 @@ public class ButtonDelete extends JButton{
 	private class ClickDelete extends MouseAdapter
 	{
 		@Override
-		public void mouseClicked(MouseEvent e) 
+		public void mousePressed(MouseEvent e) 
 		{
 			if(!isEnabled() || !config.isCan_delete()) return;		
 
