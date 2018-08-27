@@ -220,4 +220,9 @@ public class PanelControl extends JPanel{
 			buttondelete.paintImmediately(0, 0, buttondelete.getWidth(), buttondelete.getHeight());
 		}		
 	}
+	//配置数据库后，如果配置失败，则禁用掉列出缓存功能
+	public void disableListBook()
+	{
+		buttonlistbook.setEnabled(false);
+	}
 }
