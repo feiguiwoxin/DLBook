@@ -58,6 +58,24 @@ public class DL_79xs extends DLBook{
 		
 		return;
 	}
+	
+	@Override
+	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
+	{
+		Document doc = Jsoup.parse(htmlinfo);
+		BookBasicInfo bookinfo = new BookBasicInfo();
+		boolean finalflag = true;
+		String isfinal = doc.getElementsByTag("td").get(1).getElementsByTag("span").text();
+		if(isfinal.equals("连载中")) finalflag = false;
+		bookinfo.setAuthor(doc.select("#info>h1>span").text().replaceFirst("文 / ", ""));
+		bookinfo.setBookName(doc.select("#info>h1").text().replaceFirst("文 / " + bookinfo.getAuthor(), ""));
+		bookinfo.setIsfinal(finalflag);
+		bookinfo.setBookUrl("http://www.79xs.com" + doc.select(".b1>a").attr("href"));
+		bookinfo.setLastChapter(doc.select(".dd2>p>a").text());
+		bookinfo.setWebsite(websitename);
+		
+		return bookinfo;
+	}
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
@@ -90,23 +108,5 @@ public class DL_79xs extends DLBook{
 		if(text.length() == 0) return null;
 		Chapter c = new Chapter(title, text);
 		return c;
-	}
-	
-	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
-	{
-		Document doc = Jsoup.parse(htmlinfo);
-		BookBasicInfo bookinfo = new BookBasicInfo();
-		boolean finalflag = true;
-		String isfinal = doc.getElementsByTag("td").get(1).getElementsByTag("span").text();
-		if(isfinal.equals("连载中")) finalflag = false;
-		bookinfo.setAuthor(doc.select("#info>h1>span").text().replaceFirst("文 / ", ""));
-		bookinfo.setBookName(doc.select("#info>h1").text().replaceFirst("文 / " + bookinfo.getAuthor(), ""));
-		bookinfo.setIsfinal(finalflag);
-		bookinfo.setBookUrl("http://www.79xs.com" + doc.select(".b1>a").attr("href"));
-		bookinfo.setLastChapter(doc.select(".dd2>p>a").text());
-		bookinfo.setWebsite(websitename);
-		
-		return bookinfo;
 	}
 }

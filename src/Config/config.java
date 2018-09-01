@@ -36,6 +36,7 @@ public class config {
 		websites.put("website.DL_bookbao8", new websiteinfo(3, "书包网"));
 		websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
 		websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
+		websites.put("website.DL_yubook", new websiteinfo(8, "御宅屋"));
 		
 		OrderProperty pro = new OrderProperty();
 		FileInputStream fr = null;

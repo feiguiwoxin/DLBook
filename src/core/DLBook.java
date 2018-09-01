@@ -36,15 +36,22 @@ public abstract class DLBook {
 	 * getChapters用于根据getCatalog中的章节URL地址返回章节名和内容
 	 * */
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
+	/*如果能获取到所有目录，则直接获取所有目录
+	 * 如果获取不到所有目录，还提供了按章节下载，需要依次填入总章节数目（获取不到就填max）,起始网址，结束网址*/
 	protected abstract ArrayList<String> getCatalog(String Url);
+	//如果使用按章节下载的方式，则需要填入nexturl字段，否则无需填入
 	protected abstract Chapter getChapters(String Url);
 	
 	/*部分网站在第一次搜索关键字返回的结果往往不能满足我们的需要，比如我们希望从搜索结果中
 	 * 获得一个能够读取到小说目录的url，但往往搜索结果中返回的是一个小说的欢迎页面，需要在欢迎
 	 * 页面中进一步爬取需要的数据才能够正确的返回搜索结果。如果单线程访问每个搜索结果会使得搜索
 	 * 速度过慢，针对这些网站，可以使用下面这两个方法。*/
-	//如果要多线程爬取搜索结果，必须要实现这个方法，这个方法需要实现传入网页内容，输出书籍搜索信息。
-	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	/*如果要多线程爬取搜索结果，必须要实现这个方法
+	 * url 入参，欢迎页面地址
+	 * htmlinfo 根据url获取到的html信息
+	 * 此处之所以传入url是为了防止欢迎页面中直接包含目录导致获取不到目录地址
+	 * */
+	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		return null;
 	}
@@ -52,7 +59,7 @@ public abstract class DLBook {
 	 * bookinfos:出参，返回搜索结果集
 	 * charset:入参，网站的编码字符集
 	 * 多线程爬取搜索结果，如果有这方面的需求，可以调用这个函数。*/
-	protected void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
+	protected final void getbookinfos(ArrayList<String> bookurls, ArrayList<BookBasicInfo> bookinfos,String charset)
 	{
 		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
 		ArrayList<Future<BookBasicInfo>> futures = new ArrayList<Future<BookBasicInfo>>();
@@ -209,21 +216,8 @@ public abstract class DLBook {
 				return null;
 			}
 			c.setId(chapterid);
-			
-			/*对网页内容进行处理，方便后续阅读
-			1.由于mysql只能存储1-3字节的utf-8，因此去除4字节的utf-8，主要包含emoji表情，不影响汉字保存
-			2.将<br><br/><p></p>等常见的html换行符转化为\r\n
-			3.将\n全部替换为\r\n
-			4.合并\r\n将空行去除
-			5.为了方便网页阅读将换行换成<br><br>与2个空格
-			*/
-			String text = c.getText();
-			text = text.replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", "");
-			text = text.replaceAll("<br>|<p>|</p>|<br/>", "\r\n");
-			text = text.replaceAll("\n|\r\n", "\r\n");
-			text = text.replaceAll("　| |&nbsp;", "").replaceAll("\n[\\s]*\r", "");
-			text = "　　" + text.replaceAll("\r\n", "<br><br>　　");
-			c.setText(text);
+			c.format2html();
+
 			return c;
 		}
 	}
@@ -249,7 +243,8 @@ public abstract class DLBook {
 				return null;
 			}
 			
-			BookBasicInfo bookinfo = getbookinfoByhtmlinfo(htmlinfo);
+			BookBasicInfo bookinfo = getbookinfoByhtmlinfo(url, htmlinfo);
+			
 			return bookinfo;
 		}		
 	}
@@ -362,12 +357,32 @@ public abstract class DLBook {
 	 * 待全部下载完成后，根据id的顺序进行排序，保证顺序不会错误*/
 	private int DLChapters(BookBasicInfo bookinfo,int chapterid)
 	{
+		if(bookinfo.getBookUrl() == null) return -1;
+		pc.setStateMsg("从网络中获取目录",true);
+		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
+		if(catalogs == null || catalogs.size()<= 0)
+		{
+			pc.setStateMsg("获取目录失败",true);
+			return -1;
+		}
+		
 		chapterid = chapterid < 0 ? 0 : chapterid;
 		chapters = new ArrayList<Chapter>();
-		pc.setStateMsg("从网络中获取目录",true);
-		if(bookinfo.getBookUrl() == null) return -1;
-		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
-		if(catalogs == null) return -1;
+		if(!catalogs.get(0).startsWith("http"))
+		{
+			DLChaptersOneByOne(chapterid, catalogs);
+			return 0;
+		}
+		else
+		{
+			return DLChaptersByCatalogs(chapterid, catalogs);
+		}	
+	}
+	/*在能够获取到全部目录的情况下，使用多线程下载小说。
+	 * 分发线程的时候同时放入一个id用于记录章节的顺序，
+	 * 待全部下载完成后，根据id的顺序进行排序，保证顺序不会错误*/
+	private int DLChaptersByCatalogs(int chapterid, ArrayList<String> catalogs)
+	{
 		int id = 0,failnum = 0,successnum = 0,wholenum = catalogs.size() - chapterid;
 		
 		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
@@ -405,6 +420,60 @@ public abstract class DLBook {
 		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
 		return failnum;
 	}
+	/*无法获取目录则逐章下载，下载完成后返回下一章的链接*/
+	private void DLChaptersOneByOne(int chapterid, ArrayList<String> catalogs)
+	{
+		int chapternum = 0;
+		try
+		{
+			chapternum = Integer.parseInt(catalogs.get(0));
+		}
+		catch(Exception e)
+		{
+			chapternum = -1;
+		}
+		
+		if(chapternum <= chapterid && chapternum != -1)
+		{
+			pc.setStateMsg("无内容需更新，直接从数据库获取数据", true);
+			return;
+		}
+		
+		String fristurl = catalogs.get(1);
+		String endurl = catalogs.get(2);
+		String stringchapternum = chapternum == -1? "-" : String.valueOf(chapternum);
+		Chapter chapter = null;
+		int id = 0;
+		
+		do
+		{
+			id++;
+			pc.setStateMsg(String.format("逐章下载中，目前下载章节数:%d/%s", id, stringchapternum),false);
+			chapter = this.getChapters(fristurl);
+			if(chapter == null)
+			{
+				pc.setStateMsg(String.format("下载未完成，停止章节为%d,地址为%s", id, fristurl), true);
+				return;
+			}
+			
+			chapter.setId(id);
+			fristurl = chapter.getNextUrl();
+			if(id <= chapterid)
+			{
+				continue;
+			}
+			chapter.format2html();
+			chapters.add(chapter);
+			
+			if(id >= 80000)
+			{
+				pc.setStateMsg(String.format("下载章节数超过80000，强制停止避免死机"),true);
+				break;
+			}
+		}
+		while(!fristurl.equals(endurl) && fristurl!= null);
+	}
+	
 	public String getWebsitename() {
 		return websitename;
 	}

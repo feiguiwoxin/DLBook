@@ -53,14 +53,22 @@ PS：DLBookLog为运行日志，如果出现软件运行结果与预测不符合
 
 # 添加网站的方法
 ## 实现DLBook中的抽象方法
+总共考虑了2种下载小说的方式：
+1、能够获取所有目录信息，则使用多线程同时对多个目录下载
+2、无法获取目录信息，则需要根据起始地址依次逐章节下载
+如果条件允许，推荐第一种，速度更快。两种的区别在下面的函数中会有介绍
+
 ```
 //根据搜索关键字返回一个搜索结果列表
 protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
 
 //根据小说的网址返回小说的目录信息
+能够获取全部目录则直接依次填入全部章节地址，每个地址都为String类型，填入ArrayList<String>中返回
+无法获取全部目录则需要按顺序依次填入3项内容，总章节数（获取不到就填max），起始链接地址，结束链接地址（可以为null，但必须填入）
 protected abstract ArrayList<String> getCatalog(String Url);
 
 //根据小说章节地址返回小说的章节内容
+如果无法获取全部目录，需要在返回的Chapter中填入nexturl的内容，即填入下一个章节的链接
 protected abstract Chapter getChapters(String Url);
 ```
 注意：  

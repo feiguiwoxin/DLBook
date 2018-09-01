@@ -189,7 +189,7 @@ public class PanelControl extends JPanel{
 		if(msg == null) return;
 		textfieldstat.setText(msg);
 		if(intolog) System.out.println(msg);
-		textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
+		//textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
 	}
 	
 	public void UiEnabled(boolean enabled)

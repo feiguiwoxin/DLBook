@@ -82,7 +82,7 @@ public class DL_bookbao8 extends DLBook{
 	}
 	
 	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		BookBasicInfo bookinfo = new BookBasicInfo();
 		Document doc = Jsoup.parse(htmlinfo);

@@ -48,7 +48,7 @@ public class DL_shushu8 extends DLBook{
 		}
 		else
 		{
-			bookinfos.add(getbookinfoByhtmlinfo(htmlinfo));
+			bookinfos.add(getbookinfoByhtmlinfo(allurl, htmlinfo));
 			pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
 					new Date(), 1, 1, 0, this.websitename), true);
 		}
@@ -86,7 +86,7 @@ public class DL_shushu8 extends DLBook{
 	}
 	
 	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String htmlinfo)
+	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		BookBasicInfo bookinfo = new BookBasicInfo();
 		boolean isfinal = false;
