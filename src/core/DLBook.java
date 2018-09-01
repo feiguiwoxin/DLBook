@@ -296,15 +296,17 @@ public abstract class DLBook {
 			{
 				for(Chapter c : chaptersindb)
 				{
+					c.format2text();
 					bw.write("ψψψψ" + c.getTitle() + "\r\n");
-					bw.write(c.getText().replaceAll("<br>", "\r\n") + "\r\n");
+					bw.write(c.getText() + "\r\n");
 				}
 			}		
 			
 			for(Chapter c : chapters)
 			{
+				c.format2text();
 				bw.write("ψψψψ" + c.getTitle() + "\r\n");
-				bw.write(c.getText().replaceAll("<br>", "\r\n") + "\r\n");
+				bw.write(c.getText() + "\r\n");
 			}
 			chapters = null;
 			if(failnum < 0 && null != chaptersindb)

@@ -52,10 +52,17 @@ public class Chapter {
 		4.合并\r\n将空行去除
 		5.为了方便网页阅读将换行换成<br><br>与2个空格
 		*/
+		if(text == null) return;
 		text = text.replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", "");
 		text = text.replaceAll("<br>|<p>|</p>|<br/>", "\r\n");
 		text = text.replaceAll("\n|\r\n", "\r\n");
 		text = text.replaceAll("　| |&nbsp;", "").replaceAll("\n[\\s]*\r", "");
 		text = "　　" + text.replaceAll("\r\n", "<br><br>　　");
+	}
+	
+	public void format2text()
+	{
+		if(text == null) return;
+		text = text.replaceAll("<br>", "\r\n");
 	}
 }
