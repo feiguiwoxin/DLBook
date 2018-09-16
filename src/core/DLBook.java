@@ -19,6 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import static Config.config.config;
 import dao.DbControl;
 import ui.PanelControl;
@@ -104,6 +106,11 @@ public abstract class DLBook {
 			try {
 				url = new URL(Urladdress);
 				con = (HttpURLConnection)url.openConnection();
+				//增加https证书认证
+				if(Urladdress.startsWith("https"))
+				{
+					((HttpsURLConnection)con).setSSLSocketFactory(config.getSsl().getSocketFactory());
+				}
 				HttpURLConnection.setFollowRedirects(true);
 				con.setRequestProperty("Connection", "keep-alive");
 				con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
@@ -150,6 +157,11 @@ public abstract class DLBook {
 			try {
 				url = new URL(Urladdress);
 				HttpURLConnection con = (HttpURLConnection)url.openConnection();
+				//增加https证书认证
+				if(Urladdress.startsWith("https"))
+				{
+					((HttpsURLConnection)con).setSSLSocketFactory(config.getSsl().getSocketFactory());
+				}
 				HttpURLConnection.setFollowRedirects(true);		
 				con.setDoOutput(true);//设置打开输入流，这是post必须要使用的
 				con.setRequestProperty("Connection", "keep-alive");
@@ -251,7 +263,7 @@ public abstract class DLBook {
 	
 	//在构造对象的同时直接生成搜索结果
 	public DLBook(PanelControl pc)
-	{
+	{	
 		if(config.getWebsites().get(this.getClass().getName()) != null)
 		{
 			poolsize = config.getWebsites().get(this.getClass().getName()).getPoolsize();

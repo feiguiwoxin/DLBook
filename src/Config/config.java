@@ -4,8 +4,14 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
@@ -28,6 +34,7 @@ public class config {
 	private int screenwidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 	private int screenwheight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 	private final Image setting_icon = new ImageIcon(PanelControl.class.getResource("/Image/setting.png")).getImage();
+	private SSLContext ssl = null;
 	
 	private config()
 	{
@@ -37,6 +44,31 @@ public class config {
 		websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
 		websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
 		websites.put("website.DL_yubook", new websiteinfo(8, "御宅屋"));
+		
+		//设置ssl证书，自动忽略https的证书验证
+		try {
+			TrustManager[] trustallcert = {new X509TrustManager()
+			{
+				@Override
+				public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+				}
+
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+			}};
+			ssl = SSLContext.getInstance("SSL");
+			ssl.init(null, trustallcert, new SecureRandom());
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
 		
 		OrderProperty pro = new OrderProperty();
 		FileInputStream fr = null;
@@ -144,5 +176,9 @@ public class config {
 
 	public Image getSettingIcon() {
 		return setting_icon;
+	}
+
+	public SSLContext getSsl() {
+		return ssl;
 	}
 }

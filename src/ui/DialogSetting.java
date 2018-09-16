@@ -40,6 +40,7 @@ public class DialogSetting extends JDialog{
 					{
 						JCheckBox jcb = setting.getcheckboxs().get(website);
 						String current_switch = jcb.isSelected()? "1" : "0";
+						config.getWebsites().get(website).setWebswitch(jcb.isSelected());
 						if(!frist)
 						{
 							switchs.append(",");
