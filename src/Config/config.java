@@ -34,7 +34,7 @@ public class config {
 	private int screenwidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 	private int screenwheight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 	private final Image setting_icon = new ImageIcon(PanelControl.class.getResource("/Image/setting.png")).getImage();
-	private final Image soft_icon = new ImageIcon(PanelControl.class.getResource("/image/icon.png")).getImage();
+	private final Image soft_icon = new ImageIcon(PanelControl.class.getResource("/Image/icon.png")).getImage();
 
 	private SSLContext ssl = null;
 	
