@@ -32,6 +32,7 @@ public class FrameMain extends JFrame {
 	{
 		setResizable(false);
 		setTitle("小说下载器");
+		setIconImage(config.getSoft_icon());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		setBounds(config.getScreenwidth()/2 - config.getFramew()/2, config.getScreenwheight()/2- config.getFrameh()/2, config.getFramew(), config.getFrameh());
 	}
