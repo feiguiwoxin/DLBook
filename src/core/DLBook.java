@@ -29,7 +29,7 @@ public abstract class DLBook {
 	protected String websitename = null;
 	protected PanelControl pc = null;
 	private ArrayList<BookBasicInfo> bookinfos = null;
-	private ArrayList<Chapter> chapters = null;
+	private ArrayList<Chapter> chapters = new ArrayList<Chapter>();
 	private int poolsize = 8;
 	
 	/*实现这4个方法可以添加任意网站进行下载
@@ -297,7 +297,7 @@ public abstract class DLBook {
 		{
 			pc.setStateMsg(String.format("数据库获取数据成功，一共获取了%d个章节", chaptersindb.size()),true);
 		}		
-		if(chapters == null) failnum = DLChapters(bookinfo, chapterid);
+		failnum = DLChapters(bookinfo, chapterid);		
 		DbControl.dbcontrol.AddBook(bookinfo, chaptersindb, chapters);		
 
 		pc.setStateMsg("将数据写入txt文本中",true);
@@ -320,19 +320,20 @@ public abstract class DLBook {
 				bw.write("ψψψψ" + c.getTitle() + "\r\n");
 				bw.write(c.getText() + "\r\n");
 			}
-			chapters = null;
-			if(failnum < 0 && null != chaptersindb)
+
+			if(0 == chapters.size() && chaptersindb.size() > 0)
 			{
 				pc.setStateMsg("读取网络目录失败，保存数据库章节:" + chaptersindb.size(), true);
 			}
-			else if(failnum < 0 && null == chaptersindb)
+			else if(0 == chapters.size() && 0 == chaptersindb.size())
 			{
 				pc.setStateMsg("读取网络目录失败，数据库无数据，没有保存任何数据", true);
 			}
 			else
 			{
 				pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
-			}		
+			}
+			chapters.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("写入文件失败" + filename);
@@ -381,7 +382,6 @@ public abstract class DLBook {
 		}
 		
 		chapterid = chapterid < 0 ? 0 : chapterid;
-		chapters = new ArrayList<Chapter>();
 		if(!catalogs.get(0).startsWith("http"))
 		{
 			DLChaptersOneByOne(chapterid, catalogs);

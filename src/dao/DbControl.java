@@ -115,7 +115,7 @@ public class DbControl {
 	//用于更新书籍，如果书籍不存在则存储并缓存所有章节。如果已有部分章节，则只缓存新增章节
 	public void AddBook(BookBasicInfo bookinfo, ArrayList<Chapter> chaptersindb, ArrayList<Chapter> chapters)
 	{
-		if (config.getDatabase_state() != 1) return;
+		if (config.getDatabase_state() != 1 || (chapters.size()+chaptersindb.size()) == 0) return;
 		PreparedStatement ps = null;
 		int bookid,chapterid;
 		
