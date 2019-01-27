@@ -50,9 +50,4 @@ public abstract class DLBook {
 	public ArrayList<BookBasicInfo> getBookinfos() {
 		return bookinfos;
 	}
-	
-	//返回站点名
-	public String getWebsitename() {
-		return websitename;
-	}
 }
