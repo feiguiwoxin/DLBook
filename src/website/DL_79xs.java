@@ -3,18 +3,21 @@ package website;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import Tool.DLTools;
+import Tool.GetWelcomInfo;
 import core.BookBasicInfo;
 import core.Chapter;
-import core.DLBook;
+import core.DLBook_AllChapter;
 import ui.PanelControl;
 
-public class DL_79xs extends DLBook{
+public class DL_79xs extends DLBook_AllChapter implements GetWelcomInfo{
 
 	public DL_79xs(PanelControl pc) {
 		super(pc);
@@ -41,7 +44,7 @@ public class DL_79xs extends DLBook{
 	
 	private void getBookInfoByUrl(String url, ArrayList<BookBasicInfo> bookinfos)
 	{
-		String htmlinfo = getHtmlInfo(url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(url, "gb2312");
 		if(htmlinfo == null) return;
 		
 		//这个网站的搜索结果只能导向小说的index页面，这里先获取index页面的网址
@@ -54,13 +57,15 @@ public class DL_79xs extends DLBook{
 		}
 		
 		//在index页面中进一步获取书籍的主要信息
-		this.getbookinfos(bookidxurls, bookinfos, "gb2312");
+		DLTools.getbookinfos(bookidxurls, bookinfos, "gb2312", this, poolsize);
+		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+				new Date(), bookidxurls.size(), bookinfos.size(), bookidxurls.size() - bookinfos.size(), this.websitename), true);
 		
 		return;
 	}
 	
 	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
+	public BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		Document doc = Jsoup.parse(htmlinfo);
 		BookBasicInfo bookinfo = new BookBasicInfo();
@@ -79,7 +84,7 @@ public class DL_79xs extends DLBook{
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -99,7 +104,7 @@ public class DL_79xs extends DLBook{
 
 	@Override
 	protected Chapter getChapters(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);

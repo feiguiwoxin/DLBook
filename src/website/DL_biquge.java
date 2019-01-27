@@ -10,12 +10,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import Tool.DLTools;
 import core.BookBasicInfo;
 import core.Chapter;
-import core.DLBook;
+import core.DLBook_AllChapter;
 import ui.PanelControl;
 
-public class DL_biquge extends DLBook{
+public class DL_biquge extends DLBook_AllChapter{
 
 	public DL_biquge(PanelControl pc) {
 		super(pc);
@@ -32,7 +33,7 @@ public class DL_biquge extends DLBook{
 			e.printStackTrace();
 			return allbookinfo;
 		}
-		String htmlinfo = getHtmlInfo(SearchUrl, "utf-8");
+		String htmlinfo = DLTools.getHtmlInfo(SearchUrl, "utf-8");
 		if (htmlinfo == null) return allbookinfo;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -62,7 +63,7 @@ public class DL_biquge extends DLBook{
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "utf-8");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "utf-8");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -100,7 +101,7 @@ public class DL_biquge extends DLBook{
 		
 		do
 		{
-			htmlinfo = getHtmlInfo(Url, "utf-8");
+			htmlinfo = DLTools.getHtmlInfo(Url, "utf-8");
 			if (htmlinfo == null) return null;
 			trytime--;
 			Document doc = Jsoup.parse(htmlinfo);

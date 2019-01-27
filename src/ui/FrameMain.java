@@ -7,7 +7,6 @@ import java.util.Date;
 import javax.swing.JFrame;
 
 import static Config.config.*;
-import static dao.DbControl.dbcontrol;
 
 @SuppressWarnings("serial")
 public class FrameMain extends JFrame {
@@ -23,8 +22,6 @@ public class FrameMain extends JFrame {
 	{
 		setMainFrame();
 		PanelControl pc = new PanelControl();
-		dbcontrol.setPC(pc);
-		dbcontrol.initDb();
 		setContentPane(pc);
 	}
 	

@@ -14,7 +14,7 @@ import javax.swing.border.EmptyBorder;
 
 import core.BookBasicInfo;
 import core.DLBook;
-import dao.DbControl;
+
 
 import static Config.config.*;
 
@@ -25,8 +25,6 @@ public class PanelControl extends JPanel{
 	private TextFieldKeyWord textfieldkeyword = null;
 	private TextFieldStat textfieldstat = null;
 	private TableResultList tablelist = null;
-	private ButtonListBook buttonlistbook = null;
-	private ButtonDelete buttondelete = null;
 	private ArrayList<BookList> booklists = new ArrayList<BookList>();
 	private int selection_pos = -1;
 	
@@ -39,10 +37,6 @@ public class PanelControl extends JPanel{
 		textfieldkeyword = new TextFieldKeyWord(this);
 		textfieldstat = new TextFieldStat();
 		tablelist = new TableResultList(this);
-		buttonlistbook = new ButtonListBook(this);
-		buttondelete = new ButtonDelete(this);
-		add(buttonlistbook);
-		add(buttondelete);
 		add(textfieldkeyword);
 		add(buttonsearch);
 		add(buttondl);
@@ -114,15 +108,10 @@ public class PanelControl extends JPanel{
 		if(selection_pos >= 0)
 		{
 			buttondl.setEnabled(true);
-			if(config.isCan_delete())
-			{
-				buttondelete.setEnabled(true);
-			}
 		}
 		else
 		{
 			buttondl.setEnabled(false);
-			buttondelete.setEnabled(false);
 		}
 
 	}
@@ -159,26 +148,6 @@ public class PanelControl extends JPanel{
 		t.start();
 	}
 	
-	public void startDelete()
-	{	
-		if(selection_pos < 0 || booklists.size() == 0) return;
-		
-		UiEnabled(false);
-		BookList booklist = booklists.get(selection_pos);
-		boolean result = DbControl.dbcontrol.DeleteBook(booklist.getbookinfo());
-		UiEnabled(true);
-		
-		if(result)
-		{
-			booklists.remove(selection_pos);
-			flashtablelist();
-		}
-		else
-		{
-			buttonlistbook.doClick();
-		}
-	}
-	
 	public void doSearch()
 	{
 		buttonsearch.doClick();
@@ -194,35 +163,20 @@ public class PanelControl extends JPanel{
 	
 	public void UiEnabled(boolean enabled)
 	{
-		buttonlistbook.setEnabled(enabled);
 		buttonsearch.setEnabled(enabled);
 		buttondl.setEnabled(enabled);
 		tablelist.setEnabled(enabled);
-		buttondelete.setEnabled(enabled);
-		
-		if(!config.isCan_delete())
-		{
-			buttondelete.setEnabled(false);
-		}
 		
 		if(selection_pos < 0)
 		{
-			buttondelete.setEnabled(false);
 			buttondl.setEnabled(false);
 		}
 		
 		if(!enabled)
 		{
-			buttonlistbook.paintImmediately(0, 0, buttonlistbook.getWidth(), buttonlistbook.getHeight());
 			buttonsearch.paintImmediately(0, 0, buttonsearch.getWidth(), buttonsearch.getHeight());
 			buttondl.paintImmediately(0, 0, buttondl.getWidth(), buttondl.getHeight());
 			tablelist.paintImmediately(0, 0, tablelist.getWidth(), tablelist.getHeight());
-			buttondelete.paintImmediately(0, 0, buttondelete.getWidth(), buttondelete.getHeight());
 		}		
-	}
-	//配置数据库后，如果配置失败，则禁用掉列出缓存功能
-	public void disableListBook()
-	{
-		buttonlistbook.setEnabled(false);
 	}
 }

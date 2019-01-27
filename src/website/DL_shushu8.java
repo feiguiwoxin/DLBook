@@ -10,12 +10,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import Tool.DLTools;
+import Tool.GetWelcomInfo;
 import core.BookBasicInfo;
 import core.Chapter;
-import core.DLBook;
+import core.DLBook_AllChapter;
 import ui.PanelControl;
 
-public class DL_shushu8 extends DLBook{
+public class DL_shushu8 extends DLBook_AllChapter implements GetWelcomInfo{
 
 	public DL_shushu8(PanelControl pc) {
 		super(pc);
@@ -32,7 +34,7 @@ public class DL_shushu8 extends DLBook{
 			System.out.println("解码失败(gb2312,shushu8):"+key);
 			return bookinfos;
 		}
-		String htmlinfo = getHtmlInfo(allurl, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(allurl, "gb2312");
 		if(htmlinfo == null) return bookinfos;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -44,7 +46,9 @@ public class DL_shushu8 extends DLBook{
 			{
 				bookurls.add("http://www.shushu8.com" + index.getElementsByTag("a").first().attr("href"));
 			}
-			this.getbookinfos(bookurls, bookinfos, "gb2312");
+			DLTools.getbookinfos(bookurls, bookinfos, "gb2312", this, poolsize);
+			pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+					new Date(), bookurls.size(), bookinfos.size(), bookurls.size() - bookinfos.size(), this.websitename), true);
 		}
 		else
 		{
@@ -58,7 +62,7 @@ public class DL_shushu8 extends DLBook{
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if(htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -75,7 +79,7 @@ public class DL_shushu8 extends DLBook{
 
 	@Override
 	protected Chapter getChapters(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if(htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -86,7 +90,7 @@ public class DL_shushu8 extends DLBook{
 	}
 	
 	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
+	public BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		BookBasicInfo bookinfo = new BookBasicInfo();
 		boolean isfinal = false;

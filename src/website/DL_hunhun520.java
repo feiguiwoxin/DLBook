@@ -9,12 +9,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import Tool.DLTools;
 import core.BookBasicInfo;
 import core.Chapter;
-import core.DLBook;
+import core.DLBook_AllChapter;
 import ui.PanelControl;
 
-public class DL_hunhun520 extends DLBook{
+public class DL_hunhun520 extends DLBook_AllChapter{
 
 	public DL_hunhun520(PanelControl pc) {
 		super(pc);
@@ -25,7 +26,7 @@ public class DL_hunhun520 extends DLBook{
 		ArrayList<BookBasicInfo> bookinfos = new ArrayList<BookBasicInfo>();
 		LinkedHashMap<String, String> values = new LinkedHashMap<String, String>();
 		values.put("searchkey", key);
-		String htmlinfo = postHtmlInfo("https://www.hunhun520.com/novel.php?action=search", values, "gb2312", "gb2312");
+		String htmlinfo = DLTools.postHtmlInfo("https://www.hunhun520.com/novel.php?action=search", values, "gb2312", "gb2312");
 		if (htmlinfo == null) return bookinfos;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -51,7 +52,7 @@ public class DL_hunhun520 extends DLBook{
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if(htmlinfo == null) return null;
 		
 		ArrayList<String> chapters = new ArrayList<String>();
@@ -68,7 +69,7 @@ public class DL_hunhun520 extends DLBook{
 
 	@Override
 	protected Chapter getChapters(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "gb2312");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "gb2312");
 		if(htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -80,7 +81,7 @@ public class DL_hunhun520 extends DLBook{
 		//这个网站将章节内容进行了分节，因此要进一步获取分节内容
 		for(int i=2;i<2+pagenum;i++)
 		{
-			htmlinfo = getHtmlInfo(Url.replace(".html", "_"+i+".html"), "gb2312");
+			htmlinfo = DLTools.getHtmlInfo(Url.replace(".html", "_"+i+".html"), "gb2312");
 			doc = Jsoup.parse(htmlinfo);
 			text += doc.selectFirst("#content").html();
 		}

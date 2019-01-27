@@ -3,18 +3,21 @@ package website;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import Tool.DLTools;
+import Tool.GetWelcomInfo;
 import core.BookBasicInfo;
 import core.Chapter;
-import core.DLBook;
+import core.DLBook_AllChapter;
 import ui.PanelControl;
 
-public class DL_bookbao8 extends DLBook{
+public class DL_bookbao8 extends DLBook_AllChapter implements GetWelcomInfo{
 
 	public DL_bookbao8(PanelControl pc) {
 		super(pc);
@@ -33,7 +36,7 @@ public class DL_bookbao8 extends DLBook{
 			e.printStackTrace();
 			return bookinfos;
 		}
-		String htmlinfo = getHtmlInfo(allurl, "utf-8");
+		String htmlinfo = DLTools.getHtmlInfo(allurl, "utf-8");
 		if (htmlinfo == null) return bookinfos;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -46,14 +49,16 @@ public class DL_bookbao8 extends DLBook{
 			bookurls.add("https://www.bookbao8.com" +index.attr("href"));
 		}
 		
-		this.getbookinfos(bookurls, bookinfos, "utf-8");
+		DLTools.getbookinfos(bookurls, bookinfos, "utf-8", this, poolsize);
+		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+				new Date(), bookurls.size(), bookinfos.size(), bookurls.size() - bookinfos.size(), this.websitename), true);
 		
 		return bookinfos;
 	}
 
 	@Override
 	protected ArrayList<String> getCatalog(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "utf-8");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "utf-8");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -70,7 +75,7 @@ public class DL_bookbao8 extends DLBook{
 
 	@Override
 	protected Chapter getChapters(String Url) {
-		String htmlinfo = getHtmlInfo(Url, "utf-8");
+		String htmlinfo = DLTools.getHtmlInfo(Url, "utf-8");
 		if (htmlinfo == null) return null;
 		
 		Document doc = Jsoup.parse(htmlinfo);
@@ -82,7 +87,7 @@ public class DL_bookbao8 extends DLBook{
 	}
 	
 	@Override
-	protected BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
+	public BookBasicInfo getbookinfoByhtmlinfo(String url, String htmlinfo)
 	{
 		BookBasicInfo bookinfo = new BookBasicInfo();
 		Document doc = Jsoup.parse(htmlinfo);

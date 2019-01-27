@@ -4,7 +4,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 
 import static Config.config.*;
 
@@ -19,11 +18,6 @@ public class ButtonDl extends JButton{
 		{
 			if (isEnabled() && pc.getselection_pos() >= 0)
 			{
-				if(config.getDatabase_state()  == 0)
-				{
-					JOptionPane.showMessageDialog(null, "请稍候，后台正在初始化数据库资源", "提示", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
 				pc.startDl();
 			}
 		}

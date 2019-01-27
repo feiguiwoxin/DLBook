@@ -20,14 +20,6 @@ import ui.PanelControl;
 public class config {
 	public static final config config = new config();
 	
-	private String username = null;
-	private String password = null;
-	private String database = null;
-	private String ip = null;
-	private String port = null;
-	private int database_state = 0;
-	private boolean can_delete = false;
-	private String dburl = null;
 	private LinkedHashMap<String, websiteinfo> websites = new LinkedHashMap<String, websiteinfo>();
 	private int framew = 0;
 	private int frameh = 0;
@@ -40,12 +32,12 @@ public class config {
 	
 	private config()
 	{
-		websites.put("website.DL_79xs", new websiteinfo(8, "79小说"));
+		//websites.put("website.DL_79xs", new websiteinfo(8, "79小说"));
 		websites.put("website.DL_biquge", new websiteinfo(8, "笔趣阁"));
 		websites.put("website.DL_bookbao8", new websiteinfo(3, "书包网"));
 		websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
 		websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
-		websites.put("website.DL_yubook", new websiteinfo(8, "御宅屋"));
+		//websites.put("website.DL_yubook", new websiteinfo(8, "御宅屋"));
 		
 		//设置ssl证书，自动忽略https的证书验证
 		try {
@@ -77,13 +69,6 @@ public class config {
 		try {
 			fr = new FileInputStream("./config.properity");
 			pro.load(fr);
-			username = pro.getProperty("username", "root");
-			password = pro.getProperty("password", "mysql");
-			database = pro.getProperty("database", "dlbook");
-			ip = pro.getProperty("server_ip", "127.0.0.1");
-			port = pro.getProperty("port", "3306");
-			database_state = Integer.parseInt(pro.getProperty("database_state", "0"));
-			dburl = "jdbc:mysql://"+ip+":"+port+"/";
 			
 			int num = 0;
 			String[] switchs = pro.getProperty("search_switch", "1").split(",", websites.size());
@@ -124,26 +109,6 @@ public class config {
 		}
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public String getDatabase() {
-		return database;
-	}
-
-	public int getDatabase_state() {
-		return database_state;
-	}
-
-	public String getDburl() {
-		return dburl;
-	}
-
 	public LinkedHashMap<String, websiteinfo> getWebsites() {
 		return websites;
 	}
@@ -162,18 +127,6 @@ public class config {
 
 	public int getScreenwheight() {
 		return screenwheight;
-	}
-
-	public void setDatabase_state(int database_state) {
-		this.database_state = database_state;
-	}
-
-	public boolean isCan_delete() {
-		return can_delete;
-	}
-
-	public void setCan_delete(boolean can_delete) {
-		this.can_delete = can_delete;
 	}
 
 	public Image getSettingIcon() {

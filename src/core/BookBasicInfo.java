@@ -1,12 +1,12 @@
 package core;
 
 public class BookBasicInfo {
-	private String BookUrl;
-	private String BookName;
-	private String author;
-	private String lastChapter;
-	private String website;
-	private boolean isfinal;
+	private String BookUrl;//书籍URL
+	private String BookName;//书籍名字
+	private String author;//作者名字
+	private String lastChapter;//最后的章节名
+	private String website;//站点名
+	private boolean isfinal;//是否完结 0 未完结 1完结
 	
 	public String getBookUrl() {
 		return BookUrl;
