@@ -38,6 +38,7 @@ public class config {
 		websites.put("website.DL_shushu8", new websiteinfo(8, "书书吧"));
 		websites.put("website.DL_hunhun520", new websiteinfo(8, "混混小说"));
 		//websites.put("website.DL_yubook", new websiteinfo(8, "御宅屋"));
+		websites.put("website.DL_zxcs", new websiteinfo(8, "知轩藏书"));
 		
 		//设置ssl证书，自动忽略https的证书验证
 		try {
