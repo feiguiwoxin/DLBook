@@ -1,4 +1,5 @@
 width=600
 height=480
+debug=0
 #网站搜索开关设置，请使用界面上的设置项进行设置
 search_switch=1,1,1,1

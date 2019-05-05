@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -98,11 +98,11 @@ public class ButtonSearch extends JButton{
 			String key = pc.getKey().trim();
 			if(key.length() == 0)
 			{
-				pc.setStateMsg("关键字为空，不进行搜索",false);
+				pc.setStateMsg("关键字为空，不进行搜索",false, Thread.currentThread().getStackTrace()[1]);
 				return;
 			}
 			pc.emptySearchRst();
-			pc.setStateMsg(String.format("%tT:开始搜索%s", new Date(), key),true);
+			pc.setStateMsg(String.format("开始搜索\"%s\"", key),true, Thread.currentThread().getStackTrace()[1]);
 			setText("搜索中...");
 			pc.UiEnabled(false);
 			

@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -153,12 +154,23 @@ public class PanelControl extends JPanel{
 		buttonsearch.doClick();
 	}
 	
-	public void setStateMsg(String msg,boolean intolog)
+	public void setStateMsg(String msg,boolean intolog, StackTraceElement stacktrace)
 	{
 		if(msg == null) return;
+		msg = String.format("%tT : %s", new Date(), msg);
 		textfieldstat.setText(msg);
-		if(intolog) System.out.println(msg);
-		//textfieldstat.paintImmediately(0, 0, textfieldstat.getWidth(), textfieldstat.getHeight());
+		if(intolog)
+		{
+			if(config.getDebug())
+			{
+				if(null != stacktrace)
+				{
+					System.out.println(String.format("%s {File[%s], Func[%s], Line[%d]}", msg, stacktrace.getFileName(), stacktrace.getMethodName(), stacktrace.getLineNumber()));
+					return;
+				}
+			}
+			System.out.println(msg);
+		}
 	}
 	
 	public void UiEnabled(boolean enabled)

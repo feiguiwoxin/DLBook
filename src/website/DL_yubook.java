@@ -3,7 +3,6 @@ package website;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -50,8 +49,8 @@ public class DL_yubook extends DLBook_OneByOne implements GetWelcomInfo{
 		}
 		
 		DLTools.getbookinfos(bookurls, bookinfos, "utf-8", this, poolsize);
-		pc.setStateMsg(String.format("%tT:总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
-				new Date(), bookurls.size(), bookinfos.size(), bookurls.size() - bookinfos.size(), this.websitename), true);
+		pc.setStateMsg(String.format("总搜索结果:%d,解析成功:%d,解析失败:%d(%s)", 
+				bookurls.size(), bookinfos.size(), bookurls.size() - bookinfos.size(), this.websitename), true, Thread.currentThread().getStackTrace()[1]);
 		
 		return bookinfos;
 	}

@@ -27,6 +27,7 @@ public class config {
 	private int screenwheight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 	private final Image setting_icon = new ImageIcon(PanelControl.class.getResource("/Image/setting.png")).getImage();
 	private final Image soft_icon = new ImageIcon(PanelControl.class.getResource("/Image/icon.png")).getImage();
+	private boolean debug = false;
 
 	private SSLContext ssl = null;
 	
@@ -93,6 +94,7 @@ public class config {
 			frameh = frameh <= 200 ? 200 : frameh;
 			framew = framew >= screenwidth? screenwidth : framew;
 			frameh = frameh >= screenwheight? screenwheight : frameh;
+			debug = pro.getProperty("debug", "0").equals("1");
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "读取配置文件config.properity失败，请将该文件放置在当前java程序的同一级目录。",
@@ -140,5 +142,9 @@ public class config {
 
 	public SSLContext getSsl() {
 		return ssl;
+	}
+	
+	public boolean getDebug(){
+		return debug;
 	}
 }

@@ -57,10 +57,10 @@ public abstract class DLBook_AllChapter extends DLBook{
 		BufferedWriter bw = null;
 		int failnum = 0;
 		
-		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));		
+		pc.setStateMsg(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()), true, Thread.currentThread().getStackTrace()[1]);
 		failnum = DLChapters(bookinfo);		
 
-		pc.setStateMsg("将数据写入txt文本中",true);
+		pc.setStateMsg("将数据写入txt文本中",true, Thread.currentThread().getStackTrace()[1]);
 		try {
 			bw = new BufferedWriter(new FileWriter(new File(filename)));	
 			
@@ -73,11 +73,11 @@ public abstract class DLBook_AllChapter extends DLBook{
 
 			if(0 == chapters.size())
 			{
-				pc.setStateMsg("读取网络目录失败，没有保存任何数据", true);
+				pc.setStateMsg("读取网络目录失败，没有保存任何数据", true, Thread.currentThread().getStackTrace()[1]);
 			}
 			else
 			{
-				pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true);
+				pc.setStateMsg("写入完成o(∩_∩)o,失败章节数"+failnum, true, Thread.currentThread().getStackTrace()[1]);
 			}
 			chapters.clear();
 		} catch (IOException e) {
@@ -103,11 +103,11 @@ public abstract class DLBook_AllChapter extends DLBook{
 	private int DLChapters(BookBasicInfo bookinfo)
 	{
 		if(bookinfo.getBookUrl() == null) return -1;
-		pc.setStateMsg("从网络中获取目录",true);
+		pc.setStateMsg("从网络中获取目录",true, Thread.currentThread().getStackTrace()[1]);
 		ArrayList<String> catalogs = getCatalog(bookinfo.getBookUrl());
 		if(catalogs == null || catalogs.size()<= 0)
 		{
-			pc.setStateMsg("获取目录失败",true);
+			pc.setStateMsg("获取目录失败",true, Thread.currentThread().getStackTrace()[1]);
 			return -1;
 		}
 		
@@ -123,7 +123,7 @@ public abstract class DLBook_AllChapter extends DLBook{
 		
 		ExecutorService pool = Executors.newFixedThreadPool(poolsize);
 		ArrayList<Future<Chapter>> futures = new ArrayList<Future<Chapter>>();
-		pc.setStateMsg(String.format("章节共计%d,需要下载%d", catalogs.size(), wholenum),true);
+		pc.setStateMsg(String.format("章节共计%d,需要下载%d", catalogs.size(), wholenum),true, Thread.currentThread().getStackTrace()[1]);
 		for(String catalog : catalogs)
 		{
 			id ++;
@@ -135,7 +135,7 @@ public abstract class DLBook_AllChapter extends DLBook{
 		{
 			Chapter c = null;
 			try {
-				pc.setStateMsg(String.format("已完成/失败/总计:%d/%d/%d", successnum,failnum,wholenum),false);
+				pc.setStateMsg(String.format("已完成/失败/总计:%d/%d/%d", successnum,failnum,wholenum),false, Thread.currentThread().getStackTrace()[1]);
 				c = future.get();
 				if(c == null) 
 				{
@@ -151,7 +151,7 @@ public abstract class DLBook_AllChapter extends DLBook{
 			}
 		}
 		
-		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true);
+		pc.setStateMsg("数据存入数据库,需要存入数:" + successnum,true, Thread.currentThread().getStackTrace()[1]);
 		return failnum;
 	}
 }

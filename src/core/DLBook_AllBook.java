@@ -22,8 +22,7 @@ public abstract class DLBook_AllBook extends DLBook{
 	}
 
 	protected abstract ArrayList<BookBasicInfo> getBookInfoByKey(String key);
-	/*这种模式下获取的是书籍的下载地址
-	*/
+	/*这种模式下获取的是书籍的下载地址*/
 	protected abstract ArrayList<String> getCatalog(String Url);
 
 	@Override
@@ -35,22 +34,22 @@ public abstract class DLBook_AllBook extends DLBook{
 	@Override
 	public void SaveIntoFile(BookBasicInfo bookinfo){
 		//获取书籍的下载地址
-		System.out.println(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()));
+		pc.setStateMsg(String.format("书籍信息 书名:%s 作者:%s 网址:%s", bookinfo.getBookName(),bookinfo.getAuthor(),bookinfo.getBookUrl()), true, Thread.currentThread().getStackTrace()[1]);
 		ArrayList<String> catalogs = this.getCatalog(bookinfo.getBookUrl());
 		if(catalogs == null)
 		{
-			pc.setStateMsg("读取网络目录失败，没有保存任何数据", true);
+			pc.setStateMsg("读取网络目录失败，没有保存任何数据", true, Thread.currentThread().getStackTrace()[1]);
 			return;
 		}
 		
 		String bookurl = catalogs.get(0);
 		if(bookurl == null)
 		{
-			pc.setStateMsg("目录中的链接无效，没有保存任何数据", true);
+			pc.setStateMsg("目录中的链接无效，没有保存任何数据", true, Thread.currentThread().getStackTrace()[1]);
 			return;
 		}
 		
-		pc.setStateMsg("开始下载文件", true);
+		pc.setStateMsg("开始下载文件", true, Thread.currentThread().getStackTrace()[1]);
 		//获取下载类型，拼接保存文件名
 		File file = new File(bookurl);
 		String filename = file.getName();
@@ -61,7 +60,7 @@ public abstract class DLBook_AllBook extends DLBook{
 		byte[] FileData = GetFileData(bookurl, bookinfo.getBookUrl());
 		if(FileData == null)
 		{
-			pc.setStateMsg("下载文件失败，地址:" + bookurl, true);
+			pc.setStateMsg("下载文件失败，地址:" + bookurl, true, Thread.currentThread().getStackTrace()[1]);
 			return;
 		}
 		
@@ -73,7 +72,7 @@ public abstract class DLBook_AllBook extends DLBook{
 				fops.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
-				pc.setStateMsg("保存文件失败", true);
+				pc.setStateMsg("保存文件失败", true, Thread.currentThread().getStackTrace()[1]);
 			}
 			finally
 			{
@@ -88,7 +87,7 @@ public abstract class DLBook_AllBook extends DLBook{
 			e.printStackTrace();
 		}
 		
-		pc.setStateMsg("下载完成", true);
+		pc.setStateMsg("下载完成", true, Thread.currentThread().getStackTrace()[1]);
 		return;
 	}
 	
@@ -139,7 +138,7 @@ public abstract class DLBook_AllBook extends DLBook{
 		{
 			out.write(buffer, 0 ,len);
 			totallen += len;
-			pc.setStateMsg("已下载:" + totallen/1024 + "KB", false);
+			pc.setStateMsg("已下载:" + totallen/1024 + "KB", false, Thread.currentThread().getStackTrace()[1]);
 		}
 	
 		byte[] bookData = out.toByteArray();
